@@ -1,0 +1,37 @@
+{
+  "name": "contextable",
+  "version": "0.0.0",
+  "description": "Simple, unopinionated and minimalist framework for creating ORM objects.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xpepermint/contextablejs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xpepermint/contextablejs/issues"
+  },
+  "homepage": "https://github.com/xpepermint/contextablejs#readme",
+  "keywords": [
+    "orm",
+    "odm",
+    "map",
+    "mapping",
+    "context",
+    "contextify",
+    "contextable",
+    "model",
+    "modeling",
+    "document",
+    "class",
+    "db",
+    "database",
+    "storage",
+    "structure",
+    "structuring"
+  ],
+  "author": "Kristijan Sedlak (Xpepermint)",
+  "license": "MIT"
+}
