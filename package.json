@@ -1,6 +1,6 @@
 {
   "name": "contextable",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Simple, unopinionated and minimalist framework for creating ORM objects.",
   "main": "./dist/index.js",
   "ava": {
@@ -56,7 +56,10 @@
   "author": "Kristijan Sedlak (Xpepermint)",
   "license": "MIT",
   "devDependencies": {
-    "ava": "0.16.0"
+    "ava": "0.16.0",
+    "babel-cli": "6.14.0",
+    "babel-plugin-transform-runtime": "6.15.0",
+    "babel-preset-node5": "11.1.0"
   },
   "dependencies": {
     "objectschema": "0.4.6",
