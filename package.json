@@ -3,12 +3,21 @@
   "version": "0.0.0",
   "description": "Simple, unopinionated and minimalist framework for creating ORM objects.",
   "main": "./dist/index.js",
+  "ava": {
+    "files": [
+      "./tests/*.js",
+      "./tests/**/*.js"
+    ],
+    "concurrency": 4,
+    "failFast": true
+  },
   "scripts": {
     "clean": "rm -Rf ./dist",
     "prebuild": "npm run clean; mkdir -p ./dist",
     "build": "babel ./src --out-dir ./dist --copy-files",
-    "prestart": "npm run build",
-    "start": "node ./dist"
+    "pretest": "npm run build",
+    "test": "ava",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -37,5 +46,8 @@
     "structuring"
   ],
   "author": "Kristijan Sedlak (Xpepermint)",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "ava": "0.16.0"
+  }
 }
