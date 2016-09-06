@@ -2,9 +2,13 @@
   "name": "contextable",
   "version": "0.0.0",
   "description": "Simple, unopinionated and minimalist framework for creating ORM objects.",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rm -Rf ./dist",
+    "prebuild": "npm run clean; mkdir -p ./dist",
+    "build": "babel ./src --out-dir ./dist --copy-files",
+    "prestart": "npm run build",
+    "start": "node ./dist"
   },
   "repository": {
     "type": "git",
