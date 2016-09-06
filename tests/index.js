@@ -1,6 +1,7 @@
 const test = require('ava');
-const c = require('../dist');
+const contextable = require('../dist');
 
-test('test', (t) => {
-  t.pass();
+test('exposed content', (t) => {
+  t.is(!!contextable.Schema, true);
+  t.is(!!contextable.Context, true);
 });

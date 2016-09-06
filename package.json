@@ -1,6 +1,6 @@
 {
   "name": "contextable",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Simple, unopinionated and minimalist framework for creating ORM objects.",
   "main": "./dist/index.js",
   "ava": {
@@ -43,11 +43,23 @@
     "database",
     "storage",
     "structure",
-    "structuring"
+    "structuring",
+    "error",
+    "errors",
+    "handling",
+    "valid",
+    "validate",
+    "validation",
+    "type",
+    "cast"
   ],
   "author": "Kristijan Sedlak (Xpepermint)",
   "license": "MIT",
   "devDependencies": {
     "ava": "0.16.0"
+  },
+  "dependencies": {
+    "objectschema": "0.4.6",
+    "typeable": "0.3.1"
   }
 }
