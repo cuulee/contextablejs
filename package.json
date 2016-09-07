@@ -1,7 +1,7 @@
 {
   "name": "contextable",
-  "version": "0.1.1",
-  "description": "Simple, unopinionated and minimalist framework for creating ORM objects.",
+  "version": "0.1.2",
+  "description": "Simple unopinionated and minimalist framework for creating context objects supporting dynamic ORM, object schemas, data filtering, validation and error handling.",
   "main": "./dist/index.js",
   "ava": {
     "files": [
