@@ -2,7 +2,7 @@
 
 # contextable.js
 
-> Simple unopinionated and minimalist framework for creating context objects supporting dynamic ORM, object schemas, data filtering, validation and error handling.
+> Simple unopinionated and minimalist framework for creating context objects supporting dynamic ORM, object schemas, type casting, validation and error handling.
 
 This is an open source package. The source code is available on [GitHub](https://github.com/xpepermint/contextablejs) where you can also find our [issue tracker](https://github.com/xpepermint/contextablejs/issues).
 
@@ -104,64 +104,87 @@ user.name // -> 'John Smith'
 
 ## API
 
+*Contextable.js* is built on top of [objectschema.js](https://github.com/xpepermint/objectschemajs) package which depends on other cool packages like [typeable.js]() and [validatable.js](https://github.com/xpepermint/validatablejs).
+
+It provides two core classes. The `Schema` class represents a configuration object for defining context-aware models and the `Context` represents a dynamic ORM framework with models.
+
 ### Schema
 
-**new Schema({mode, validator, fields, classMethods, classVirtuals, instanceMethods, instanceVirtuals)**
+Schema represents a configuration object from which a Model class is created. It holds information about fields, type casting, how fields are validated, what the default values are. It also holds class methods, instance methods, class virtual fields and instance virtual fields.
+
+A Schema can also be used as a custom type object. This means that you can create a nested data structure by setting a schema instance for a field type.
+
+**new Schema({fields, mode, validator, classMethods, classVirtuals, instanceMethods, instanceVirtuals)**
 
 > A class for defining document structure.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
-| mode | String | No | strict | Type of schema (use `relaxed` to allow dynamic fields).
-| validator | Object | No | using [validatablejs](https://github.com/xpepermint/validatablejs) defaults | Object with custom validators (this variable is merged with built-in validators thus you can override a validator key if you need to).
 | fields | Object | Yes | - | An object with fields definition.
-| classMethods | Object | No | - | An object defining static class methods.
-| classVirtuals | Object | No | - | An object defining static enumerable virtual properties of a class.
-| instanceMethods | Object | No | - | An object defining instance methods of a class.
-| instanceVirtuals | Object | No | - | An object defining enumerable virtual properties of a class instance.
+| mode | String | No | strict | A schema type (use `relaxed` to allow dynamic fields not defined by the schema).
+| validator | Object | No | validatable.js defaults | Configuration options for the Validator class, provided by the [validatable.js](https://github.com/xpepermint/validatablejs), which is used by this package for field validation.
+| classMethods | Object | No | - | An object defining model's class methods.
+| classVirtuals | Object | No | - | An object defining model's enumerable class virtual properties.
+| instanceMethods | Object | No | - | An object defining model's instance methods.
+| instanceVirtuals | Object | No | - | An object defining model's  enumerable virtual properties.
 
 ```js
-// schema fields example
-let fields = {
-  name: { // field name holding a field definition
-    type: 'string', // field type
-    defaultValue: 'John Smith', // default field value
-    validations: { // field validations
+export const mode = 'strict'; // schema mode
+
+export const fields = {
+  email: { // a field name holding a field definition
+    type: 'string', // a field data type provided by typeable.js
+    defaultValue: 'John Smith', // a default field value
+    validations: { // field validations provided by validatable.js
       presence: { // validator name
-        message: 'is required' // validator options
+        message: 'is required' // validator option
       }
     }
-  }
+  },
 };
 
-// schema classMethods example
-let classMethods = {
-  ping() { /* do something */ }
+export const validator = {}; // validatable.js configuration options (see the package's page for details)
+
+export const classMethods = {
+  ping() { /* do something */ } // synchronous or asynchronous
 };
 
-// schema classVirtuals example
-let classVirtuals = {
+export const classVirtuals = {
   version: {
     set(v) { /* setter */ }
     get() { /* getter */ }
   }
 };
 
-// schema instanceMethods example
-let instanceMethods = {
-  getTime() { /* do something */ }
+export const instanceMethods = {
+  getTime() { /* do something */ } // synchronous or asynchronous
 };
 
-// schema instanceVirtuals example
-let instanceVirtuals = {
+export const instanceVirtuals = {
   name: {
     set(v) { /* setter */ }
     get() { /* getter */ }
   }
 };
+
+export new Schema({
+  mode,
+  fields,
+  validator,
+  classMethods,
+  classVirtuals,
+  instanceMethods,
+  instanceVirtuals
+});
 ```
 
-This Schema class originates in the [objectschemajs](https://github.com/xpepermint/objectschemajs) package which integrates [typeablejs](https://github.com/xpepermint/typeablejs) module for type casting and [validatablejs](https://github.com/xpepermint/validatablejs) for field value validation. See these packages for available configuration options and further details.
+As mentioned before, this package uses [typeable.js](https://github.com/xpepermint/typeablejs) for data type casting. Many common data types and array types are supported. Please check package's website for a list of supported types and further information.
+
+By default, all fields in a schema are set to `null`. We can set a default value for a field by setting the `defaultValue` option.
+
+Field validation is handled by the [validatable.js](https://github.com/xpepermint/validatablejs) package. We can configure the validator by passing the validator option to the Schema class, which will be passed directly to the Validator class. The package provides many built-in validators, allows adding custom validators and overriding existing ones. Please check package's website for details.
+
+Schema also holds information about class methods, instance methods, class virtual fields and instance virtual fields of a model. Note that you can define any type of method - synchronous or asynchronous, with callbacks or promises.
 
 ### Context
 
