@@ -3,13 +3,15 @@ const {Schema} = require('../dist');
 const {createModel} = require('../dist/model');
 
 /*
-* Model configuration.
+* Configuration.
 */
+
+let ctx = {sessionID: 'asdf987as9d8f798fdg6s78'};
 
 let userSchema = new Schema({
   fields: {
     firstName: {
-      type: 'string',
+      type: 'String',
       validations: {
         presence: {
           message: 'is required'
@@ -17,7 +19,7 @@ let userSchema = new Schema({
       }
     },
     lastName: {
-      type: 'string',
+      type: 'String',
       validations: {
         presence: {
           message: 'is required'
@@ -42,8 +44,6 @@ let userSchema = new Schema({
     }
   }
 });
-
-let ctx = {sessionID: 'asdf987as9d8f798fdg6s78'};
 let User = createModel(userSchema, ctx);
 
 let user = new User({

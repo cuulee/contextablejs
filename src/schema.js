@@ -17,8 +17,8 @@ export class Schema extends schema.Schema {
   * Class constructor.
   */
 
-  constructor({mode=modes.STRICT, fields={}, validator={}, classMethods={}, classVirtuals={}, instanceMethods={}, instanceVirtuals={}}={}) {
-    super({mode, fields, validator});
+  constructor({mode=modes.STRICT, fields={}, validator={}, type={}, classMethods={}, classVirtuals={}, instanceMethods={}, instanceVirtuals={}}={}) {
+    super({mode, fields, validator, type});
 
     if (!isObject(classMethods)) {
       throw new Error(`Schema classMethods key should be an Object`);
@@ -27,7 +27,6 @@ export class Schema extends schema.Schema {
       throw new Error(`Schema instanceMethods key should be an Object`);
     }
 
-    this.validator = validator; // model validator configuration options
     this.classMethods = classMethods; // model class methods
     this.classVirtuals = classVirtuals; // model class virtual fields
     this.instanceMethods = instanceMethods; // model instance methods

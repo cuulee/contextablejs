@@ -9,10 +9,12 @@ test('initial properties', (t) => {
 });
 
 test('defineModel', (t) => {
+  let ctx = new Context();
+
   let userSchema = new Schema({
     fields: {
       name: {
-        type: 'string',
+        type: 'String',
         defaultValue: 'noname',
         validations: {
           presence: {
@@ -22,8 +24,6 @@ test('defineModel', (t) => {
       },
     }
   });
-
-  let ctx = new Context();
   let User = ctx.defineModel('User', userSchema);
   let user = new User();
 
