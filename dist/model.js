@@ -4,17 +4,29 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
+
+var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
+var _assign = require('babel-runtime/core-js/object/assign');
+
+var _assign2 = _interopRequireDefault(_assign);
+
 var _defineProperty = require('babel-runtime/core-js/object/define-property');
 
 var _defineProperty2 = _interopRequireDefault(_defineProperty);
 
 exports.createModel = createModel;
 
+var _typeable = require('typeable');
+
 var _objectschema = require('objectschema');
 
-var objectschema = _interopRequireWildcard(_objectschema);
+var _handleable = require('handleable');
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+var _schema = require('./schema');
+
+var _errors = require('./errors');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -29,20 +41,38 @@ function createModel(schema) {
   let instanceMethods = schema.instanceMethods;
   let instanceVirtuals = schema.instanceVirtuals;
 
-  // Model class template
+  /*
+  * Model class template.
+  */
 
-  class Model extends objectschema.Document {
+  class Model extends _objectschema.Document {
 
-    constructor(data) {
-      super(schema, data);
+    /*
+    * Class constructor.
+    */
 
-      // attaching context as instance variable
+    constructor() {
+      var _arguments = Array.prototype.slice.call(arguments);
+
+      let relatedSchema = _arguments[0];
+      let data = _arguments[1]; // a workaround because a Document constructor has 2 arguments
+
+      if (!data) {
+        data = relatedSchema;
+        relatedSchema = schema;
+      }
+      super(relatedSchema, data);
+
+      Object.defineProperty(this, 'handler', {
+        value: this._createHandler(),
+        enumerable: false // do not expose as object key
+      });
+
       Object.defineProperty(this, 'ctx', {
         get: () => ctx,
         enumerable: false // do not expose as object key
       });
 
-      // attaching instance methods
       for (let name in instanceMethods) {
         let method = instanceMethods[name];
 
@@ -52,7 +82,6 @@ function createModel(schema) {
         });
       }
 
-      // attaching instance virtuals
       for (let name in instanceVirtuals) {
         var _instanceVirtuals$nam = instanceVirtuals[name];
         let get = _instanceVirtuals$nam.get;
@@ -66,15 +95,161 @@ function createModel(schema) {
         });
       }
     }
+
+    /*
+    * Returns a new instance of validator.
+    */
+
+    _createHandler() {
+      return new _handleable.Handler((0, _assign2.default)({}, this.schema.handlerOptions, { context: this }));
+    }
+
+    /*
+    * OVERRIDING: Validates all class fields and returns errors.
+    */
+
+    validate() {
+      var _this = this;
+
+      return (0, _asyncToGenerator3.default)(function* () {
+        let errors = yield _this._validateFields();
+
+        if ((0, _typeable.isPresent)(errors)) {
+          throw new _errors.ValidationError(errors);
+        }
+      })();
+    }
+
+    /*
+    * If the error isn's an instance of ValidationError, then it tries to
+    * create one by using fields handlers. If no errors are found then the
+    * original error is returned.
+    */
+
+    handle(error) {
+      var _this2 = this;
+
+      return (0, _asyncToGenerator3.default)(function* () {
+        let errors = yield _this2._handleFields(error);
+
+        if ((0, _typeable.isPresent)(errors)) {
+          return new _errors.ValidationError(errors);
+        } else {
+          return error;
+        }
+      })();
+    }
+
+    /*
+    * Returns an object with handled errors per field. Note that related null
+    * documents (where Schema field is null) are ignored!
+    */
+
+    _handleFields(error) {
+      var _this3 = this;
+
+      return (0, _asyncToGenerator3.default)(function* () {
+        if (error instanceof _errors.ValidationError) {
+          return error.fields;
+        }
+
+        let data = {};
+        for (let name in _this3.schema.fields) {
+
+          let info = yield _this3._handleField(error, name);
+          if (!(0, _typeable.isUndefined)(info)) {
+            data[name] = info;
+          }
+        }
+
+        return data;
+      })();
+    }
+
+    /*
+    * Handles an error for a specified field.
+    */
+
+    _handleField(error, name) {
+      var _this4 = this;
+
+      return (0, _asyncToGenerator3.default)(function* () {
+        let value = _this4[name];
+        let definition = _this4.schema.fields[name];
+
+        return yield _this4._handleValue(error, value, definition);
+      })();
+    }
+
+    /*
+    * Handles a value agains the field `definition` object.
+    */
+
+    _handleValue(error, value, definition) {
+      var _this5 = this;
+
+      return (0, _asyncToGenerator3.default)(function* () {
+        let data = {};
+
+        data.messages = yield _this5.handler.handle(error, value, definition.handle);
+
+        let related = yield _this5._handleRelatedObject(error, value, definition);
+        if (related) {
+          data.related = related;
+        }
+
+        let isValid = data.messages.length === 0 && _this5._isRelatedObjectValid(related);
+        return isValid ? undefined : data;
+      })();
+    }
+
+    /*
+    * Handles nested data of a value agains the field `definition` object.
+    */
+
+    _handleRelatedObject(error, value, definition) {
+      var _this6 = this;
+
+      return (0, _asyncToGenerator3.default)(function* () {
+        let type = definition.type;
+
+
+        if (!value) {
+          return undefined;
+        } else if (type instanceof _schema.Schema) {
+          return yield value._handleFields(error);
+        } else if ((0, _typeable.isArray)(type) && (0, _typeable.isArray)(value)) {
+          let items = [];
+
+          for (let v of value) {
+            if (type[0] instanceof _schema.Schema) {
+              if (v) {
+                items.push((yield v._handleFields(error)));
+              } else {
+                items.push(undefined);
+              }
+            } else {
+              items.push((yield _this6._handleValue(error, v, definition)));
+            }
+          }
+          return items;
+        } else {
+          return undefined;
+        }
+      })();
+    }
+
   };
 
-  // attaching context as a class variable
+  /*
+  * Module static properties.
+  */
+
   Object.defineProperty(Model, 'ctx', {
     get: () => ctx,
     enumerable: false // do not expose as object key
   });
 
-  // attaching class methods
   for (let name in classMethods) {
     let method = classMethods[name];
 
@@ -84,7 +259,6 @@ function createModel(schema) {
     });
   }
 
-  // attaching class virtuals
   for (let name in classVirtuals) {
     var _classVirtuals$name = classVirtuals[name];
     let get = _classVirtuals$name.get;
@@ -98,6 +272,9 @@ function createModel(schema) {
     });
   }
 
-  // returning model class
+  /*
+  * Returning Module class.
+  */
+
   return Model;
 }

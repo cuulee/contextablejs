@@ -80,14 +80,14 @@ let userSchema = new Schema({
 
 Each field in a schema must have a `type` attribute which defines how a model should cast field's value. *Contextable.js* supports common [data types](#schema) but we can define our own types if needed. Our schema now have two `string` fields and one field which is an `array of strings`.
 
-Fields can be validated simply by adding the `validations` attribute to each field definition block. *Contextable.js* includes many [built-in validators](#schema) that we can use. For now we will only check if the fields are present.
+Fields can be validated simply by adding the `validate` attribute to a field definition block. *Contextable.js* includes many [built-in validators](#schema) that we can use. For now we will only check if the fields are present.
 
 ```js
 let userSchema = new Schema({
   fields: {
     firstName: {
       ...
-      validations: {
+      validate: {
         presence: {
           message: 'is required'
         }
@@ -95,7 +95,7 @@ let userSchema = new Schema({
     },
     lastName: {
       ...
-      validations: {
+      validate: {
         presence: {
           message: 'is required'
         }
@@ -194,14 +194,15 @@ let user = new User({
   tags: ['admin']
 });
 
+let error = null;
+let data = null;
 try {
-  await user.approve(); // throw an error when invalid
-  await user.save(); // save to database
+  await user.approve(); // throw an error when fields are invalid
+  data = await user.save(); // save to database
 } catch(e) {
-  if (await user.handle(e)) throw e; // parse errors
+  error = await user.handle(e); // wrap known validation errors into
+  await ctx.parseError(error);
 }
-let errors = user.getValidationErrors(); // nicely formatted error messages
-let data = user.toObject(); // nicely formatted data object
 ```
 
 That's it.
@@ -218,7 +219,7 @@ Schema represents a configuration object from which a Model class is created. It
 
 A Schema can also be used as a custom type object. This means that you can create a nested data structure by setting a schema instance for a field type.
 
-**new Schema({fields, mode, validator, classMethods, classVirtuals, instanceMethods, instanceVirtuals)**
+**new Schema({fields, mode, validatorOptions, typeOptions, handlerOptions, classMethods, classVirtuals, instanceMethods, instanceVirtuals)**
 
 > A class for defining document structure.
 
@@ -226,8 +227,9 @@ A Schema can also be used as a custom type object. This means that you can creat
 |--------|------|----------|---------|------------
 | fields | Object | Yes | - | An object with fields definition.
 | mode | String | No | strict | A schema type (use `relaxed` to allow dynamic fields not defined by the schema).
-| validator | Object | No | validatable.js defaults | Configuration options for the Validator class, provided by the [validatable.js](https://github.com/xpepermint/validatablejs), which are used by this package for field validation.
-| type | Object | No | typeable.js defaults | Configuration options which are passed directly to the the `cast` method of the [typeable.js](https://github.com/xpepermint/typeablejs) package which is used for type casting.
+| validatorOptions | Object | No | validatable.js defaults | Configuration options for the Validator class, provided by the [validatable.js](https://github.com/xpepermint/validatablejs), which is used for field validation.
+| typeOptions | Object | No | typeable.js defaults | Configuration options for the cast method provided by the [typeable.js](https://github.com/xpepermint/typeablejs), which is used for data type casting.
+| handlerOptions | Object | No | handleable.js defaults | Configuration options for the Handler class, provided by the [handleable.js](https://github.com/xpepermint/handleablejs), which is used for field error handling.
 | classMethods | Object | No | - | An object defining model's class methods.
 | classVirtuals | Object | No | - | An object defining model's enumerable class virtual properties.
 | instanceMethods | Object | No | - | An object defining model's instance methods.
@@ -240,12 +242,12 @@ export const fields = {
   email: { // a field name holding a field definition
     type: 'String', // a field data type provided by typeable.js
     defaultValue: 'John Smith', // a default field value
-    validations: { // field validations provided by validatable.js
+    validate: { // field validations provided by validatable.js
       presence: { // validator name
         message: 'is required' // validator option
       }
     },
-    handlers: { // error handling provided by handle
+    handle: { // error handling provided by handle
       mongoUniqueness: { // handler name
         message: 'is already taken', // handler option
         indexName: 'uniqEmail' // handler option
@@ -254,11 +256,11 @@ export const fields = {
   },
 };
 
-export const validator = {}; // validatable.js configuration options (see the package's page for details)
+export const validatorOptions = {}; // validatable.js configuration options (see the package's page for details)
 
-export const type = {}; // typeable.js configuration options (see the package's page for details)
+export const typeOptions = {}; // typeable.js configuration options (see the package's page for details)
 
-export const handler = {}; // handlable.js configuration options (see the package's page for details)
+export const handlerOptions = {}; // handleable.js configuration options (see the package's page for details)
 
 export const classMethods = {
   ping() { /* do something */ } // synchronous or asynchronous
@@ -282,10 +284,12 @@ export const instanceVirtuals = {
   }
 };
 
-export new Schema({
+export const schema = new Schema({
   mode,
   fields,
-  validator,
+  validatorOptions,
+  typeOptions,
+  handlerOptions,
   classMethods,
   classVirtuals,
   instanceMethods,
@@ -293,17 +297,19 @@ export new Schema({
 });
 ```
 
-As mentioned before, this package uses [typeable.js](https://github.com/xpepermint/typeablejs) for data type casting. Many common data types and array types are supported. Please check package's website for a list of supported types and further information.
+This package uses [typeable.js](https://github.com/xpepermint/typeablejs) for data type casting. Many common data types and array types are supported but we can also define custom types or override existing types through a `typeOptions` key. Please check package's website for a list of supported types and further information.
 
 By default, all fields in a schema are set to `null`. We can set a default value for a field by setting the `defaultValue` option.
 
-Field validation is handled by the [validatable.js](https://github.com/xpepermint/validatablejs) package. We can configure the validator by passing the validator option to the Schema class, which will be passed directly to the Validator class. The package provides many built-in validators, allows adding custom validators and overriding existing ones. Please check package's website for details.
+Field validation is handled by the [validatable.js](https://github.com/xpepermint/validatablejs) package. We can configure the package by passing the `validatorOptions` option to our schema which will be passed directly to the `Validator` class. The package provides many built-in validators, allows adding custom validators and overriding existing ones. When a document is created all validator methods share document's context thus we can write context-aware checks. Please check package's website for details.
 
-Schema also holds information about class methods, instance methods, class virtual fields and instance virtual fields of a model. Note that you can define any type of method - synchronous or asynchronous, with callbacks or promises.
+*Contextable.js* has a unique concept of handling field-related errors. It uses the [handleable.js](https://github.com/xpepermint/handleablejs) under the hood. We can configure the package by passing the `handlerOptions` key to our schema which will be passed directly to the `Handler` class. The package already provides some built-in handlers, it allows adding custom handlers and overriding existing ones. When a document is created all handlers share document's context thus we can write context-aware checks. Please check package's website for further information.
+
+Schema also holds information about model's class methods, instance methods, class virtual fields and instance virtual fields. You can define synchronous or asynchronous, class and instance methods. All model properties are context-aware and you can access the context through the `this.ctx` getter.
 
 ### Context
 
-Context is an object on which we attach application-related configuration, data adapters and other information. It provides methods for creating context-aware documents which we call models.
+Context is an object, holding application-related configuration data, data adapters and other information. It provides methods for creating unopinionated, context-aware, schema enforced models.
 
 **new Context(props)**
 
@@ -315,9 +321,9 @@ Context is an object on which we attach application-related configuration, data 
 
 ```js
 const ctx = new Context({
-  key: '8090913k12k3j1lk5j23k4',
-  mongo: mongoose.connect('mongodb://localhost/test'),
-  session: req.session
+  key: '8090913k12k3j1lk5j23k4', // example variable
+  mongo: mongoose.connect('mongodb://localhost/test'), // example variable
+  session: req.session // example variable
 });
 ```
 
@@ -348,21 +354,28 @@ const ctx = new Context({
 
 ### Model
 
-A model is a class which is dynamically built from a schema. A model is an upgraded and context-aware [Document](https://github.com/xpepermint/objectschemajs#document) class, provided by the underlying [objectschema.js](https://github.com/xpepermint/objectschemajs) package, with custom class methods, enumerable class properties, instance methods and enumerable instance properties.
-
-A model also provides a unique unified validation and error handling mechanism where where validation and other errors are handled in a single way thus we can show unified error messages to a user.
+A model is unopinionated, context-aware and schema enforced data object. It represents a class, which is dynamically built from a schema. A model is an upgraded [Document](https://github.com/xpepermint/objectschemajs#document) class, provided by the underlying [objectschema.js](https://github.com/xpepermint/objectschemajs) package, with custom class methods, enumerable class properties, instance methods and enumerable instance properties.
 
 ```js
 let Model = ctx.defineModel('Model', schema);
 ```
 
-**model.approve()**
+A model provides a unified validation and error handling mechanism.
 
-> Validates model fields and throws a ValidationError when fields are not valid.
+```js
+let error = null;
+let data = null;
+try {
+  await model.validate(); // throw an error when invalid
+  data = ...; // save to database
+} catch(e) {
+  error = await model.handle(e); // create ValidationError from field-related errors or return the original error
+}
+```
 
-**model.handle(error)**
+**model.handle(error)**:Error
 
-> Parses an error into a friendly error message which can be shown to a user.
+> If the error isn's an instance of ValidationError, then it tries to create one by using fields handlers. If no errors are found then the original error is returned.
 
 **model.populate(data)**:Model
 
@@ -372,22 +385,9 @@ let Model = ctx.defineModel('Model', schema);
 |--------|------|----------|---------|------------
 | data | Object | Yes | - | Data object.
 
-**model.populateField(name, value)**:Any
-
-> Sets a value of a model field.
-
-| Option | Type | Required | Default | Description
-|--------|------|----------|---------|------------
-| name | String | Yes | - | Model field name.
-| value | Any | Yes | - | Data object.
-
 **model.clear()**:Model
 
 > Sets all model fields to `null`.
-
-**model.clearField(name)**:Model
-
-> Sets a model field to `null`.
 
 **model.clone()**:Model
 
@@ -397,53 +397,9 @@ let Model = ctx.defineModel('Model', schema);
 
 > Converts a model into serialized data object.
 
-**model.validate()**:Promise
+**model.validate()**
 
-> Validates all model fields and returns errors.
-
-```js
-{ // return value example
-  name: { // field value is missing
-    messages: ['is required'],
-    isValid: false
-  },
-  book: { // nested object is missing
-    messages: ['is required'],
-    isValid: false
-  },
-  address: {
-    messages: [],
-    related: { // nested object errors
-      post: {
-        messages: ['is required'],
-        isValid: false
-      }
-    },
-    isValid: false
-  },
-  friends: { // an array of nested objects has errors
-    messages: [],
-    related: [
-      undefined, // the first item was valid
-      { // the second item has errors
-        name: {
-          messages: ['is required'],
-          isValid: false
-        }
-      }
-    ],
-    isValid: false
-  }
-}
-```
-
-**model.validateField(name)**:Promise
-
-> Validates a model field and returns errors.
-
-| Option | Type | Required | Default | Description
-|--------|------|----------|---------|------------
-| name | String | Yes | - | Document field name.
+> Validates all model fields and throws a ValidationError if not all fileds are valid.
 
 **model.isValid()**:Promise
 

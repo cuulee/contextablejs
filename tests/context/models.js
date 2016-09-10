@@ -1,40 +1,21 @@
 const test = require('ava');
-const {Context, Schema} = require('../dist');
-
-test('initial properties', (t) => {
-  let ctx = new Context({version: 3});
-
-  t.is(ctx.version, 3);
-  t.deepEqual(Object.keys(ctx), ['version']);
-});
+const {Context, Schema} = require('../../dist');
 
 test('defineModel', (t) => {
   let ctx = new Context();
 
-  let userSchema = new Schema({
-    fields: {
-      name: {
-        type: 'String',
-        defaultValue: 'noname',
-        validations: {
-          presence: {
-            message: 'is required'
-          }
-        }
-      },
-    }
-  });
+  let userSchema = new Schema();
   let User = ctx.defineModel('User', userSchema);
   let user = new User();
 
   t.is(User.ctx, ctx);
   t.is(user.ctx, ctx);
-  t.is(user.name, 'noname');
 });
 
 test('getModel', (t) => {
-  let userSchema = new Schema();
   let ctx = new Context();
+
+  let userSchema = new Schema();
   let User0 = ctx.defineModel('User', userSchema);
   let User1 = ctx.getModel('User');
 
@@ -42,8 +23,9 @@ test('getModel', (t) => {
 });
 
 test('deleteModel', (t) => {
-  let userSchema = new Schema();
   let ctx = new Context();
+
+  let userSchema = new Schema();
   let User0 = ctx.defineModel('User', userSchema);
   ctx.deleteModel('User');
   let User1 = ctx.getModel('User');

@@ -1,4 +1,12 @@
-import * as objectschema from 'objectschema';
+import {
+  isPresent,
+  isArray,
+  isUndefined
+} from 'typeable';
+import {Document} from 'objectschema';
+import {Handler} from 'handleable';
+import {Schema} from './schema';
+import {ValidationError} from './errors';
 
 /*
 * Creates a Model class with context.
@@ -7,19 +15,34 @@ import * as objectschema from 'objectschema';
 export function createModel(schema, ctx=null) {
   let {classMethods, classVirtuals, instanceMethods, instanceVirtuals} = schema;
 
-  // Model class template
-  class Model extends objectschema.Document {
+  /*
+  * Model class template.
+  */
 
-    constructor(data) {
-      super(schema, data);
+  class Model extends Document {
 
-      // attaching context as instance variable
+    /*
+    * Class constructor.
+    */
+
+    constructor() {
+      let [relatedSchema, data] = arguments; // a workaround because a Document constructor has 2 arguments
+      if (!data) {
+        data = relatedSchema;
+        relatedSchema = schema;
+      }
+      super(relatedSchema, data);
+
+      Object.defineProperty(this, 'handler', {
+        value: this._createHandler(),
+        enumerable: false // do not expose as object key
+      });
+
       Object.defineProperty(this, 'ctx', {
         get: () => ctx,
         enumerable: false // do not expose as object key
       });
 
-      // attaching instance methods
       for (let name in instanceMethods) {
         let method = instanceMethods[name];
 
@@ -29,7 +52,6 @@ export function createModel(schema, ctx=null) {
         });
       }
 
-      // attaching instance virtuals
       for (let name in instanceVirtuals) {
         let {get, set} = instanceVirtuals[name];
 
@@ -40,15 +62,139 @@ export function createModel(schema, ctx=null) {
         });
       }
     }
+
+    /*
+    * Returns a new instance of validator.
+    */
+
+    _createHandler() {
+      return new Handler(Object.assign({}, this.schema.handlerOptions, {context: this}));
+    }
+
+    /*
+    * OVERRIDING: Validates all class fields and returns errors.
+    */
+
+    async validate() {
+      let errors = await this._validateFields();
+
+      if (isPresent(errors)) {
+        throw new ValidationError(errors);
+      }
+    }
+
+    /*
+    * If the error isn's an instance of ValidationError, then it tries to
+    * create one by using fields handlers. If no errors are found then the
+    * original error is returned.
+    */
+
+    async handle(error) {
+      let errors = await this._handleFields(error);
+
+      if (isPresent(errors)) {
+        return new ValidationError(errors);
+      } else {
+        return error;
+      }
+    }
+
+    /*
+    * Returns an object with handled errors per field. Note that related null
+    * documents (where Schema field is null) are ignored!
+    */
+
+    async _handleFields(error) {
+      if (error instanceof ValidationError) {
+        return error.fields;
+      }
+
+      let data = {};
+      for (let name in this.schema.fields) {
+
+        let info = await this._handleField(error, name);
+        if (!isUndefined(info)) {
+          data[name] = info;
+        }
+      }
+
+      return data;
+    }
+
+    /*
+    * Handles an error for a specified field.
+    */
+
+    async _handleField(error, name) {
+      let value = this[name];
+      let definition = this.schema.fields[name];
+
+      return await this._handleValue(error, value, definition);
+    }
+
+    /*
+    * Handles a value agains the field `definition` object.
+    */
+
+    async _handleValue(error, value, definition) {
+      let data = {};
+
+      data.messages = await this.handler.handle(error, value, definition.handle);
+
+      let related = await this._handleRelatedObject(error, value, definition);
+      if (related) {
+        data.related = related;
+      }
+
+      let isValid = (
+        data.messages.length === 0
+        && this._isRelatedObjectValid(related)
+      );
+      return isValid ? undefined : data;
+    }
+
+    /*
+    * Handles nested data of a value agains the field `definition` object.
+    */
+
+    async _handleRelatedObject(error, value, definition) {
+      let {type} = definition;
+
+      if (!value) {
+        return undefined;
+      } else if (type instanceof Schema) {
+        return await value._handleFields(error);
+      } else if (isArray(type) && isArray(value)) {
+        let items = [];
+
+        for (let v of value) {
+          if (type[0] instanceof Schema) {
+            if (v) {
+              items.push(await v._handleFields(error));
+            } else {
+              items.push(undefined);
+            }
+          } else {
+            items.push(await this._handleValue(error, v, definition));
+          }
+        }
+        return items;
+      } else {
+        return undefined;
+      }
+    }
+
   };
 
-  // attaching context as a class variable
+  /*
+  * Module static properties.
+  */
+
   Object.defineProperty(Model, 'ctx', {
     get: () => ctx,
     enumerable: false // do not expose as object key
   });
 
-  // attaching class methods
   for (let name in classMethods) {
     let method = classMethods[name];
 
@@ -58,7 +204,6 @@ export function createModel(schema, ctx=null) {
     });
   }
 
-  // attaching class virtuals
   for (let name in classVirtuals) {
     let {get, set} = classVirtuals[name];
 
@@ -69,6 +214,9 @@ export function createModel(schema, ctx=null) {
     });
   }
 
-  // returning model class
+  /*
+  * Returning Module class.
+  */
+
   return Model;
 }

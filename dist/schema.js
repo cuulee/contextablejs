@@ -36,10 +36,12 @@ class Schema extends schema.Schema {
     let mode = _ref$mode === undefined ? modes.STRICT : _ref$mode;
     var _ref$fields = _ref.fields;
     let fields = _ref$fields === undefined ? {} : _ref$fields;
-    var _ref$validator = _ref.validator;
-    let validator = _ref$validator === undefined ? {} : _ref$validator;
-    var _ref$type = _ref.type;
-    let type = _ref$type === undefined ? {} : _ref$type;
+    var _ref$validatorOptions = _ref.validatorOptions;
+    let validatorOptions = _ref$validatorOptions === undefined ? {} : _ref$validatorOptions;
+    var _ref$typeOptions = _ref.typeOptions;
+    let typeOptions = _ref$typeOptions === undefined ? {} : _ref$typeOptions;
+    var _ref$handlerOptions = _ref.handlerOptions;
+    let handlerOptions = _ref$handlerOptions === undefined ? {} : _ref$handlerOptions;
     var _ref$classMethods = _ref.classMethods;
     let classMethods = _ref$classMethods === undefined ? {} : _ref$classMethods;
     var _ref$classVirtuals = _ref.classVirtuals;
@@ -49,8 +51,11 @@ class Schema extends schema.Schema {
     var _ref$instanceVirtuals = _ref.instanceVirtuals;
     let instanceVirtuals = _ref$instanceVirtuals === undefined ? {} : _ref$instanceVirtuals;
 
-    super({ mode, fields, validator, type });
+    super({ mode, fields, validatorOptions, typeOptions });
 
+    if (!(0, _typeable.isObject)(handlerOptions)) {
+      throw new Error(`Schema handlerOptions key should be an Object`);
+    }
     if (!(0, _typeable.isObject)(classMethods)) {
       throw new Error(`Schema classMethods key should be an Object`);
     }
@@ -58,6 +63,7 @@ class Schema extends schema.Schema {
       throw new Error(`Schema instanceMethods key should be an Object`);
     }
 
+    this.handlerOptions = handlerOptions; // handleable.js configuration options
     this.classMethods = classMethods; // model class methods
     this.classVirtuals = classVirtuals; // model class virtual fields
     this.instanceMethods = instanceMethods; // model instance methods
