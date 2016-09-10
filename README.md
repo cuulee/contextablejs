@@ -12,21 +12,21 @@ This is an open source package. The source code is available on [GitHub](https:/
 
 ### Application Context
 
-[Monolithic applications](https://en.wikipedia.org/wiki/Monolithic_application) usually have a single entry point where project gets initialized, where connection to a database is handled, where dependencies are loaded, where related services are started, where content is rendered and so on. All these parts usually share the same application context and we can use context-aware components (e.g. database models) anywhere in our code.
+[Monolithic applications](https://en.wikipedia.org/wiki/Monolithic_application) usually have a single entry point where a project gets initialized, where a connection to a database is handled, where dependencies are loaded, where related services are started, where content is rendered and so on. All these parts usually share the same application context and we can use context-aware components (e.g. database models) anywhere in our code.
 
 Node.js gives us freedom which allows for different applications and multiple instances of the same application to be started in the same process. This means that all services in this case share the same application context which is not desirable and many times seriously dangerous. This freedom doesn't come without sacrifices. Not having a unified application context is a very big problem and writing a long-term sustainable code becomes a challenge.
 
-Wouldn't be nice if we could create an application context object for each application and we would simple send a desired context down to all application objects when the application is created and the application would magically work isolated from other applications in the process. The application in this case becomes a configurable component thus we can run multiple instances of the same application, with different contexts, within the same process.
+Wouldn't be nice if we could create an application context object for each application and we would simple send it down to application objects when the application is created and the application would magically work isolated from other applications in the process. The application in this case becomes a configurable component thus we can run multiple instances of the same application, with different contexts, within the same process.
 
-This is one of the core features of *Contextable.js*. The idea is not drastically new but  brings a different prospective of what an application is and how ti works. Did you know, that the JavaScript implementation of [GraphQL](https://github.com/graphql/graphql-js) adopts this concept - you send a context to GraphQL resolvers by passing it as an argument to the `graphql` method? There are other examples, for sure.
+This is one of the core features of *Contextable.js*. The idea is not drastically new but brings a different prospective of what an application is and how ti works. Did you know, that the JavaScript implementation of [GraphQL](https://github.com/graphql/graphql-js) adopts this concept - you send a context to GraphQL resolvers by passing it as an argument to the `graphql` method? There are other examples, for sure.
 
 ### Unopinionated ORM
 
-Almost all monolithic frameworks provide some sort of ORM (e.g. ActiveRecord) for easy data manipulation where the magic does all the heavy database stuff. A good and flexible ORM is actually the crucial added value for a developer. Good JavaScript ORMs also handle data type casting for us thus the object values always have the desired data type. Beside that and all other goodies, things get complicated if multiple database adapters are needed. None of these solutions expect that a single model would need to use two or more different databases at the same time within the same model. All models are supposed to use a single database adapter.
+Almost all monolithic frameworks provide some sort of ORM (e.g. ActiveRecord) for easy data manipulation where the magic does all the heavy database stuff. Good and flexible ORM is the crucial added value for a developer. Good JavaScript ORMs also handle data type casting for us thus the object values always have the desired data type. Beside that and all other goodies, things get complicated if multiple database adapters are needed. None of these solutions expect that a single model would need to use two or more different databases at the same time within the same model. All models are supposed to use a single database adapter.
 
-In Node.js environment you can find super duper ORM packages like [mongoose](http://mongoosejs.com/), [sequelize](sequelizejs.com), [bookshelf](http://bookshelfjs.org/) and so on. You can get pretty cool layer of functionality as with popular monolithic frameworks like Ruby on Rails but you still don't have a unified ORM system and your models are always locked to a specific database adapter.
+In Node.js environment you can find super duper ORM packages like [mongoose](http://mongoosejs.com/), [sequelize](sequelizejs.com), [bookshelf](http://bookshelfjs.org/) and so on. You can get pretty good layer of functionality as with popular monolithic frameworks like Ruby on Rails, but you still don't have a unified ORM system and your models are always locked to a specific database adapter.
 
-*Contextable.js* is unopinionated ORM offering tools for building unopinionated models withing a context. Models share the same (application) context and thus can use all features attached to a context. This means that if you attach [MongoDB](https://github.com/mongodb/node-mongodb-native) and [ElasticSearch](https://github.com/elastic/elasticsearch-js) connectors to a context your models will be able to use both of them at the same time. You can add whatever you need to a context and all that features are automagically available in all you models. Pretty cool right?
+*Contextable.js* is unopinionated ORM, offering tools for building unopinionated, context-aware models. Models share the same (application) context and thus can use all features attached to a context. This means that if you attach [MongoDB](https://github.com/mongodb/node-mongodb-native) and [ElasticSearch](https://github.com/elastic/elasticsearch-js) connectors to a context your models will be able to use both of them at the same time. You can add whatever you need to a context and all that features are automagically available in all you models.
 
 ### Validation and Error Handling
 
@@ -34,9 +34,9 @@ Data validation and error handling is a common thing when writing API controller
 
 ORM frameworks usually provide object validation out of the box. What about error handling? Isn't that pretty similar thing? Validation happens before actual action and error handling happens afterwords thus validation and error handling go hand in hand. *Contextable.js* has been written with that in mind.
 
-Let's take a real life use case where we are inserting books with unique names into a MongoDB collection. We validate each book before we write anything into a database. To be safe, we also validate if a book with the provided name already exists. If the book object isn't valid we show nicely formatted error messages to a user telling what went wrong. When the object is valid we write it to the database. Will the operation succeed? Maybe yes, sometimes no. We can expect at least the `E11000` MongoDB error, for sure. This is because validation and write operation do not execute in atomic way. In case of an error we again want to show a nicely formatted error message to a user. This means that we need to write two error handling mechanisms for pretty much the same thing.
+Let's take a real life use case where we are inserting books with unique names into a MongoDB collection. We validate each book before we write anything into a database. To be safe, we also validate that a book with the provided name does not exists in a database. If the book object isn't valid we show nicely formatted error message to a user telling what went wrong. When the object is valid we write it to the database. Will the operation always succeed? Maybe yes, sometimes no. We can expect at least the `E11000` MongoDB error. This is because validation and write operation do not execute in atomic way. In case of a database error, we again want to show a nicely formatted error message to a user. This means that we need to write two error handling mechanisms for pretty much the same thing.
 
-*Contextable.js* unifies validation and error handling. We can handle validation and other errors in a single way thus we can show unified error messages to a user. We only need to tell *Contextable.js* which errors to be handled and how to be handled, *Contextable.js* will do the rest.
+*Contextable.js* unifies validation and error handling. We can handle validation and other field-related errors in a single way. We only need to tell *Contextable.js* which errors to be handled and how to be handled, *Contextable.js* will do the rest.
 
 ## Install
 
@@ -101,14 +101,19 @@ let userSchema = new Schema({
         }
       }
     },
-    tags: [
+    tags: {
       ...
-    ]
+      validate: {
+        presence: {
+          message: 'is required'
+        }
+      }
+    }
   }
 });
 ```
 
-Schema also supports computed fields, thus we can define class and instance virtual fields as well.
+Schema also supports computed fields, thus we can define class and instance virtual fields.
 
 ```js
 let userSchema = new Schema({
@@ -145,9 +150,9 @@ let userSchema = new Schema({
 });
 ```
 
-Where did the `this.ctx.mongo` came from? Models are context-aware documents and this is how you access application context. Before we create a context let's define some handlers for handling errors.
+Where did the `this.ctx.mongo` came from? Models are context-aware documents and this is how you access application context to which a model belongs to. Before we create a context let's define some handlers for handling field-related errors.
 
-It's not a coincident that we use [MongoDB](http://mongodb.github.io/node-mongodb-native/) in this tutorial. How to use the MongoDB driver and how to create a unique index is out of scope for this tutorial, but before you continue make sure, that you have a unique index with name `uniqueFirstName` for the `firstName` field defined on the `users` collection. When the `insert` method, which we defined earlier, is triggered for the second time, MongoDB will triggers the `E11000` error and our handler will catch it and parse it into a nicely formatted validation error format. *Contextable.js* comes with some pre-build handlers and `mongoUniqueness` is one of them.
+It's not a coincident that we use [MongoDB](http://mongodb.github.io/node-mongodb-native/) in this tutorial. How to use the MongoDB driver and how to create a unique index is out of scope for this tutorial, but before you continue make sure, that you have a `unique` `sparse` index named `uniqueFirstName` for the `firstName` field defined on the `users` collection. When the `insert` method, which we defined earlier, is triggered for the second time, MongoDB will triggers the `E11000` error and our handler will catch it and convert it into a validation error. *Contextable.js* comes with some pre-build handlers and `mongoUniqueness` is one of them.
 
 ```js
 let userSchema = new Schema({
@@ -166,7 +171,7 @@ let userSchema = new Schema({
 });
 ```
 
-The context with [MongoDB connector](http://mongodb.github.io/node-mongodb-native/) is what we need to create as our next step.
+Continue by creating a context with a [MongoDB connector](http://mongodb.github.io/node-mongodb-native/) attached as `mongo` variab.
 
 ```js
 import {MongoClient} from 'mongodb';
@@ -177,13 +182,13 @@ let mongo = await MongoClient.connect('mongodb://localhost:27017/test');
 let ctx = new Context({mongo});
 ```
 
-We can now create a model from our schema above.
+We can now create a model from `userSchema`.
 
 ```js
 ctx.createModel('User', userSchema); // -> User
 ```
 
-Let's take a common scenario and imagine that we write an [Express](http://expressjs.com) route handler, a [Koa](http://koajs.com) controller or maybe a [GraphQL](https://github.com/graphql/graphql-js) mutation which will save user data into a database. We need to first validate the input, save the input to a database and then respond with the created object or with a nicely formatted error. Here is how the code will look like.
+Let's take a common scenario and imagine that we write an [Express](http://expressjs.com) route handler, a [Koa](http://koajs.com) controller or maybe a [GraphQL](https://github.com/graphql/graphql-js) mutation, which will save user data into a database. We need to first validate the input, save the input data to a database and then respond with the created object or with a nicely formatted error. Here is how the code will look like.
 
 ```js
 let User = ctx.getModel('User');
@@ -194,30 +199,25 @@ let user = new User({
   tags: ['admin']
 });
 
-let error = null;
-let data = null;
 try {
-  await user.approve(); // throw an error when fields are invalid
-  data = await user.save(); // save to database
+  await user.validate(); // throws an error when fields are invalid
+  return await user.insert(); // saves input data to a database
 } catch(e) {
-  error = await user.handle(e); // wrap known validation errors into
-  await ctx.parseError(error);
+  return await user.handle(e); // handle field-related errors
 }
 ```
 
-That's it.
-
 ## API
 
-*Contextable.js* is built on top of [objectschema.js](https://github.com/xpepermint/objectschemajs) package which uses [typeable.js](https://github.com/xpepermint/typeablejs) for type casting and [validatable.js](https://github.com/xpepermint/validatablejs) for fields validation.
+*Contextable.js* is built on top of [objectschema.js](https://github.com/xpepermint/objectschemajs) package which uses [typeable.js](https://github.com/xpepermint/typeablejs) for type casting, [validatable.js](https://github.com/xpepermint/validatablejs) for fields validation and [handleable.js](https://github.com/xpepermint/handleablejs) for handling field-related errors.
 
 It provides two core classes. The `Schema` class represents a configuration object for defining context-aware models and the `Context` represents an unopinionated ORM framework.
 
 ### Schema
 
-Schema represents a configuration object from which a Model class is created. It holds information about fields, type casting, how fields are validated, what the default values are. It also holds class methods, instance methods, class virtual fields and instance virtual fields.
+Schema represents a configuration object from which a Model class can be created. It holds information about fields, type casting, how fields are validated, how errors are handled and what the default values are. It also holds model's class methods, instance methods, class virtual fields and instance virtual fields.
 
-A Schema can also be used as a custom type object. This means that you can create a nested data structure by setting a schema instance for a field type.
+A Schema can also be used as a custom type object. This way you can create a nested data structure by setting a schema instance for a field `type`. When a model is created, each schema in a tree of fields will become an instance of a Model - a tree of models.
 
 **new Schema({fields, mode, validatorOptions, typeOptions, handlerOptions, classMethods, classVirtuals, instanceMethods, instanceVirtuals)**
 
