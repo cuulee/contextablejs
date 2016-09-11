@@ -35,6 +35,7 @@ export class ApplicationContext extends Context {
   async start() {
     if (!this._mongo) {
       this._mongo = await MongoClient.connect('mongodb://localhost:27017/test');
+
       await this._mongo.collection('users').createIndex(
         {email: 1},
         {unique: 1, sparse: 1, name: 'uniqueEmail'}

@@ -1,6 +1,6 @@
 {
   "name": "contextable",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Simple, unopinionated and minimalist framework for creating context objects with support for unopinionated ORM, object schemas, type casting, validation and error handling.",
   "main": "./dist/index.js",
   "ava": {
@@ -66,7 +66,7 @@
   },
   "dependencies": {
     "handleable": "0.2.0",
-    "objectschema": "0.5.5",
+    "objectschema": "0.5.6",
     "typeable": "0.5.2"
   }
 }
