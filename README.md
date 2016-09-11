@@ -185,7 +185,7 @@ let ctx = new Context({mongo});
 We can now create a model from `userSchema`.
 
 ```js
-ctx.createModel('User', userSchema); // -> User
+ctx.defineModel('User', userSchema); // -> User
 ```
 
 Let's take a common scenario and imagine that we write an [Express](http://expressjs.com) route handler, a [Koa](http://koajs.com) controller or maybe a [GraphQL](https://github.com/graphql/graphql-js) mutation, which will save user data into a database. We need to first validate the input, save the input data to a database and then respond with the created object or with a nicely formatted error. Here is how the code will look like.
@@ -408,6 +408,10 @@ try {
 **model.equalsTo(value)**:Boolean
 
 > Returns `true` when the provided `value` represents an object with the same field values as the original model.
+
+## Example
+
+An example application is available in the `./example` folder. You can start the example by executing the `npm run example` command.
 
 ## License (MIT)
 

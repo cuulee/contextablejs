@@ -73,6 +73,11 @@ function createModel(schema) {
         enumerable: false // do not expose as object key
       });
 
+      Object.defineProperty(this, 'Model', {
+        get: () => Model,
+        enumerable: false // do not expose as object key
+      });
+
       for (let name in instanceMethods) {
         let method = instanceMethods[name];
 
@@ -254,7 +259,7 @@ function createModel(schema) {
     let method = classMethods[name];
 
     (0, _defineProperty2.default)(Model, name, {
-      value: method.bind({ ctx }),
+      value: method.bind({ ctx, Model }),
       enumerable: false // do not expose as object key
     });
   }
@@ -266,8 +271,8 @@ function createModel(schema) {
 
 
     (0, _defineProperty2.default)(Model, name, {
-      get: get ? get.bind({ ctx }) : undefined,
-      set: set ? set.bind({ ctx }) : undefined,
+      get: get ? get.bind({ ctx, Model }) : undefined,
+      set: set ? set.bind({ ctx, Model }) : undefined,
       enumerable: true // expose as object key
     });
   }

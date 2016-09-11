@@ -43,6 +43,11 @@ export function createModel(schema, ctx=null) {
         enumerable: false // do not expose as object key
       });
 
+      Object.defineProperty(this, 'Model', {
+        get: () => Model,
+        enumerable: false // do not expose as object key
+      });
+
       for (let name in instanceMethods) {
         let method = instanceMethods[name];
 
@@ -199,7 +204,7 @@ export function createModel(schema, ctx=null) {
     let method = classMethods[name];
 
     Object.defineProperty(Model, name, {
-      value: method.bind({ctx}),
+      value: method.bind({ctx, Model}),
       enumerable: false // do not expose as object key
     });
   }
@@ -208,8 +213,8 @@ export function createModel(schema, ctx=null) {
     let {get, set} = classVirtuals[name];
 
     Object.defineProperty(Model, name, {
-      get: get ? get.bind({ctx}) : undefined,
-      set: set ? set.bind({ctx}) : undefined,
+      get: get ? get.bind({ctx, Model}) : undefined,
+      set: set ? set.bind({ctx, Model}) : undefined,
       enumerable: true // expose as object key
     });
   }

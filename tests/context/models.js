@@ -32,3 +32,21 @@ test('deleteModel', (t) => {
 
   t.is(User1, undefined);
 });
+
+test('this.class', (t) => {
+  let ctx = new Context();
+
+  let userSchema = new Schema({
+    classMethods: {
+      test() { return this.Model }
+    },
+    instanceMethods: {
+      test() { return this.Model }
+    }
+  });
+  let User = ctx.defineModel('User', userSchema);
+  let user = new User();
+
+  t.is(User.test() === ctx.getModel('User'), true);
+  t.is(user.test() === ctx.getModel('User'), true);
+});

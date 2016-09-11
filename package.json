@@ -1,6 +1,6 @@
 {
   "name": "contextable",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Simple, unopinionated and minimalist framework for creating context objects with support for unopinionated ORM, object schemas, type casting, validation and error handling.",
   "main": "./dist/index.js",
   "ava": {
@@ -17,7 +17,9 @@
     "build": "babel ./src --out-dir ./dist --copy-files",
     "pretest": "npm run build",
     "test": "ava",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "preexample": "npm run build",
+    "example": "babel-node ./example"
   },
   "repository": {
     "type": "git",
@@ -59,11 +61,12 @@
     "ava": "0.16.0",
     "babel-cli": "6.14.0",
     "babel-plugin-transform-runtime": "6.15.0",
-    "babel-preset-node5": "11.1.0"
+    "babel-preset-node5": "11.1.0",
+    "mongodb": "2.2.9"
   },
   "dependencies": {
     "handleable": "0.2.0",
-    "objectschema": "0.5.2",
-    "typeable": "0.5.1"
+    "objectschema": "0.5.5",
+    "typeable": "0.5.2"
   }
 }
