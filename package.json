@@ -1,6 +1,6 @@
 {
   "name": "contextable",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Simple, unopinionated and minimalist framework for creating context objects with support for unopinionated ORM, object schemas, type casting, validation and error handling.",
   "main": "./dist/index.js",
   "ava": {
@@ -58,15 +58,15 @@
   "author": "Kristijan Sedlak (Xpepermint)",
   "license": "MIT",
   "devDependencies": {
-    "ava": "0.16.0",
-    "babel-cli": "6.14.0",
-    "babel-plugin-transform-runtime": "6.15.0",
-    "babel-preset-node5": "11.1.0",
-    "mongodb": "2.2.9"
+    "ava": "0.16.x",
+    "babel-cli": "6.14.x",
+    "babel-plugin-transform-runtime": "6.15.x",
+    "babel-preset-node5": "11.1.x",
+    "mongodb": "2.2.x"
   },
   "dependencies": {
-    "handleable": "0.2.0",
-    "objectschema": "0.5.6",
-    "typeable": "0.5.2"
+    "handleable": "0.2.x",
+    "objectschema": "0.5.x",
+    "typeable": "0.5.x"
   }
 }
