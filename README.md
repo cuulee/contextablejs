@@ -377,6 +377,10 @@ try {
 
 > If the error isn's an instance of ValidationError, then it tries to create one by using fields handlers. If no errors are found then the original error is returned.
 
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| error | Error | Yes | - | Instance of an Error object.
+
 **model.populate(data)**:Model
 
 > Assigns data to a model.
@@ -408,6 +412,10 @@ try {
 **model.equalsTo(value)**:Boolean
 
 > Returns `true` when the provided `value` represents an object with the same field values as the original model.
+
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| value | Object | Yes | - | Data object.
 
 ## Example
 
