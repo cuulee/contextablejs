@@ -3,7 +3,25 @@ const {Schema} = require('../../dist');
 const {createModel} = require('../../dist/model');
 const {ValidationError} = require('../../dist/errors');
 
-test('validate', async (t) => {
+test.only('validate (throws ValidationError)', async (t) => {
+  let userSchema = new Schema({
+    fields: {
+      name: {
+        type: 'String',
+        validate: {
+          presence: {message: 'is required'}
+        }
+      }
+    }
+  });
+
+  let User = createModel(userSchema);
+  let user = new User();
+
+  t.throws(user.validate(), ValidationError);
+});
+
+test('validate (ValidationError fields property structure)', async (t) => {
   let bookSchema = new Schema({
     fields: {
       title: {
@@ -66,9 +84,6 @@ test('validate', async (t) => {
 
   let User = createModel(userSchema);
   let user = new User(data);
-
-  t.throws(user.validate(), ValidationError);
-
   try {
     await user.validate();
   } catch(e) {

@@ -3,7 +3,25 @@ const {Schema} = require('../../dist');
 const {createModel} = require('../../dist/model');
 const {ValidationError} = require('../../dist/errors');
 
-test('handle (fields definitions)', async (t) => {
+test('handle (handled error is returned)', async (t) => {
+  let User = createModel(new Schema());
+  let user = new User();
+
+  let error = new ValidationError();
+
+  t.is(await user.handle(error), error);
+});
+
+test('handle (unknown error is thrown)', async (t) => {
+  let User = createModel(new Schema());
+  let user = new User();
+
+  let error = new Error();
+
+  t.throws(user.handle(error), Error);
+});
+
+test('handle (ValidationError fields property structure)', async (t) => {
   let handlerOptions = {
     handlers: {
       alreadyTaken: (e) => e.message === 'already taken',
@@ -85,24 +103,4 @@ test('handle (fields definitions)', async (t) => {
       ]
     }
   });
-});
-
-test('handle (ValidationError is passed through)', async (t) => {
-  let User = createModel(new Schema());
-  let user = new User();
-
-  let error = new ValidationError();
-  let result = await user.handle(error);
-
-  t.is(result, error);
-});
-
-test('handle (unknown error si passed through)', async (t) => {
-  let User = createModel(new Schema());
-  let user = new User();
-
-  let error = new Error();
-  let result = await user.handle(error);
-
-  t.is(result, error);
 });

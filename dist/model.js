@@ -127,20 +127,24 @@ function createModel(schema) {
 
     /*
     * If the error isn's an instance of ValidationError, then it tries to
-    * create one by using fields handlers. If no errors are found then the
-    * original error is returned.
+    * create one by checking the fields handlers. If errors are found then
+    * the ValidationError is returned, otherwise the methods throws an error.
     */
 
     handle(error) {
       var _this2 = this;
 
       return (0, _asyncToGenerator3.default)(function* () {
-        let errors = yield _this2._handleFields(error);
-
-        if ((0, _typeable.isPresent)(errors)) {
-          return new _errors.ValidationError(errors);
-        } else {
+        if (error instanceof _errors.ValidationError) {
           return error;
+        } else {
+          let errors = yield _this2._handleFields(error);
+
+          if ((0, _typeable.isPresent)(errors)) {
+            return new _errors.ValidationError(errors);
+          } else {
+            throw error;
+          }
         }
       })();
     }
@@ -154,14 +158,11 @@ function createModel(schema) {
       var _this3 = this;
 
       return (0, _asyncToGenerator3.default)(function* () {
-        if (error instanceof _errors.ValidationError) {
-          return error.fields;
-        }
-
         let data = {};
-        for (let name in _this3.schema.fields) {
 
+        for (let name in _this3.schema.fields) {
           let info = yield _this3._handleField(error, name);
+
           if (!(0, _typeable.isUndefined)(info)) {
             data[name] = info;
           }

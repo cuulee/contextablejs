@@ -90,18 +90,23 @@ export function createModel(schema, ctx=null) {
 
     /*
     * If the error isn's an instance of ValidationError, then it tries to
-    * create one by using fields handlers. If no errors are found then the
-    * original error is returned.
+    * create one by checking the fields handlers. If errors are found then
+    * the ValidationError is returned, otherwise the methods throws an error.
     */
 
     async handle(error) {
-      let errors = await this._handleFields(error);
-
-      if (isPresent(errors)) {
-        return new ValidationError(errors);
+      if (error instanceof ValidationError) {
+        return error;
       }
       else {
-        return error;
+        let errors = await this._handleFields(error);
+
+        if (isPresent(errors)) {
+          return new ValidationError(errors);
+        }
+        else {
+          throw error;
+        }
       }
     }
 
@@ -111,14 +116,11 @@ export function createModel(schema, ctx=null) {
     */
 
     async _handleFields(error) {
-      if (error instanceof ValidationError) {
-        return error.fields;
-      }
-
       let data = {};
-      for (let name in this.schema.fields) {
 
+      for (let name in this.schema.fields) {
         let info = await this._handleField(error, name);
+
         if (!isUndefined(info)) {
           data[name] = info;
         }

@@ -206,7 +206,7 @@ try {
   data = await user.insert(); // saves input data to a database
 }
 catch(e) {
-  error = await user.handle(e); // creates a ValidationError from field-related errors or returns the original error
+  error = await user.handle(e); // creates a ValidationError from field-related errors or throws the original
 }
 // so something with data or error ...
 ```
@@ -372,10 +372,10 @@ try {
   await model.validate(); // throw an error when invalid
 }
 catch(e) {
-  validationError = await model.handle(e); // creates a ValidationError from field-related errors or returns the original error
+  validationError = await model.handle(e); // creates a ValidationError from field-related errors or throws the original
 }
 
-let errors = validationError.toArray(); // returns an array of validation errors
+let errors = validationError.toArray(); // returns an array of validation errors (toObject() is also available)
 ```
 
 **model.clear()**:Model
@@ -394,9 +394,9 @@ let errors = validationError.toArray(); // returns an array of validation errors
 |--------|------|----------|---------|------------
 | value | Object | Yes | - | Data object.
 
-**model.handle(error)**:Error
+**model.handle(error)**:ValidationError
 
-> If the error isn's an instance of ValidationError, then it tries to create one by using fields handlers. If no errors are found then the original error is returned.
+> If the error isn's an instance of ValidationError, then it tries to create one by using fields handlers. If the method is unable to handle the error, it throws the original error.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
@@ -420,7 +420,7 @@ let errors = validationError.toArray(); // returns an array of validation errors
 
 **model.validate()**
 
-> Validates all model fields and throws a ValidationError if not all fileds are valid.
+> Validates model fields and throws a ValidationError if not all fileds are valid.
 
 ## Example
 

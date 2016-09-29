@@ -3,6 +3,10 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.ValidationError = exports.GeneralError = undefined;
+
+var _typeable = require('typeable');
+
 /*
 * General error.
 */
@@ -40,7 +44,8 @@ class ValidationError extends GeneralError {
   * Class constructor.
   */
 
-  constructor(fields) {
+  constructor() {
+    let fields = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
     let message = arguments.length <= 1 || arguments[1] === undefined ? 'Some fields are not valid.' : arguments[1];
 
     super(message);
@@ -49,7 +54,15 @@ class ValidationError extends GeneralError {
   }
 
   /*
-  * Converts the class fields into an array of errors.
+  * Returns the fields property.
+  */
+
+  toObject() {
+    return this.fields;
+  }
+
+  /*
+  * Converts class fields into an array of errors.
   */
 
   toArray() {
@@ -66,9 +79,9 @@ class ValidationError extends GeneralError {
     let errors = [];
 
     for (let key in fields) {
-      var _fields$key = fields[key];
-      let messages = _fields$key.messages;
-      let related = _fields$key.related;
+      let field = fields[key];
+      let messages = field.messages;
+      let related = field.related;
 
 
       if (messages.length > 0) {
@@ -78,8 +91,16 @@ class ValidationError extends GeneralError {
         });
       }
 
-      if (related) {
-        errors = errors.concat(this._fieldsToArray(related, key));
+      if (related && (0, _typeable.isArray)(related)) {
+        for (let i in related) {
+          let item = related[i];
+
+          if (!(0, _typeable.isUndefined)(item)) {
+            errors = errors.concat(this._fieldsToArray(item, [prefix, key, i].filter(v => !!v).join('.')));
+          }
+        }
+      } else if (related) {
+        errors = errors.concat(this._fieldsToArray(related, [prefix, key].filter(v => !!v).join('.')));
       }
     }
 

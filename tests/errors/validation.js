@@ -1,6 +1,19 @@
 const test = require('ava');
 const {ValidationError} = require('../../dist/errors');
 
+test('toObject', (t) => {
+  let err = new ValidationError({
+    email: {
+      messages: [
+        'is required',
+        'is not an email'
+      ]
+    }
+  });
+
+  t.deepEqual(err.toObject(), err.fields);
+});
+
 test('toArray', (t) => {
   let err = new ValidationError({
     email: {
@@ -9,15 +22,27 @@ test('toArray', (t) => {
         'is not an email'
       ]
     },
-    friends: {
+    server: {
       messages: [],
       related: {
-        name: {
+        address: {
           messages: [
             'is required'
           ]
         }
       }
+    },
+    friends: {
+      messages: [],
+      related: [
+        {
+          name: {
+            messages: [
+              'is required'
+            ]
+          }
+        }
+      ]
     }
   });
 
@@ -30,7 +55,13 @@ test('toArray', (t) => {
       ]
     },
     {
-      path: 'friends.name',
+      path: 'server.address',
+      messages: [
+        'is required'
+      ]
+    },
+    {
+      path: 'friends.0.name',
       messages: [
         'is required'
       ]

@@ -1,3 +1,8 @@
+import {
+  isUndefined,
+  isArray
+} from 'typeable';
+
 /*
 * General error.
 */
@@ -35,14 +40,22 @@ export class ValidationError extends GeneralError {
   * Class constructor.
   */
 
-  constructor(fields, message='Some fields are not valid.') {
+  constructor(fields={}, message='Some fields are not valid.') {
     super(message);
     this.fields = fields;
     this.code = 422;
   }
 
   /*
-  * Converts the class fields into an array of errors.
+  * Returns the fields property.
+  */
+
+  toObject() {
+    return this.fields;
+  }
+
+  /*
+  * Converts class fields into an array of errors.
   */
 
   toArray() {
@@ -57,7 +70,8 @@ export class ValidationError extends GeneralError {
     let errors = [];
 
     for (let key in fields) {
-      let {messages, related} = fields[key];
+      let field = fields[key];
+      let {messages, related} = field;
 
       if (messages.length > 0) {
         errors.push({
@@ -66,9 +80,20 @@ export class ValidationError extends GeneralError {
         });
       }
 
-      if (related) {
+      if (related && isArray(related)) {
+        for (let i in related) {
+          let item = related[i];
+
+          if (!isUndefined(item)) {
+            errors = errors.concat(
+              this._fieldsToArray(item, [prefix, key, i].filter(v => !!v).join('.'))
+            );
+          }
+        }
+      }
+      else if (related) {
         errors = errors.concat(
-          this._fieldsToArray(related, key)
+          this._fieldsToArray(related, [prefix, key].filter(v => !!v).join('.'))
         );
       }
     }
