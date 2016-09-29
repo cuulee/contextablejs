@@ -199,12 +199,16 @@ let user = new User({
   tags: ['admin']
 });
 
+let error = null;
+let data = null;
 try {
-  await user.validate(); // throws an error when fields are invalid
-  return await user.insert(); // saves input data to a database
-} catch(e) {
-  return await user.handle(e); // handle field-related errors
+  await user.validate(); // throws a ValidationError when fields are invalid
+  data = await user.insert(); // saves input data to a database
 }
+catch(e) {
+  error = await user.handle(e); // creates a ValidationError from field-related errors or returns the original error
+}
+// so something with data or error ...
 ```
 
 ## API
@@ -321,7 +325,7 @@ Context is an object, holding application-related configuration data, data adapt
 
 ```js
 const ctx = new Context({
-  key: '8090913k12k3j1lk5j23k4', // example variable
+  version: '1.2.3', // example variable
   mongo: mongoose.connect('mongodb://localhost/test'), // example variable
   session: req.session // example variable
 });
@@ -363,31 +367,16 @@ let Model = ctx.defineModel('Model', schema);
 A model provides a unified validation and error handling mechanism.
 
 ```js
-let error = null;
-let data = null;
+let validationError = null;
 try {
   await model.validate(); // throw an error when invalid
-  data = ...; // save to database
-} catch(e) {
-  error = await model.handle(e); // create ValidationError from field-related errors or return the original error
 }
+catch(e) {
+  validationError = await model.handle(e); // creates a ValidationError from field-related errors or returns the original error
+}
+
+let errors = validationError.toArray(); // returns an array of validation errors
 ```
-
-**model.handle(error)**:Error
-
-> If the error isn's an instance of ValidationError, then it tries to create one by using fields handlers. If no errors are found then the original error is returned.
-
-| Option | Type | Required | Default | Description
-|--------|------|----------|---------|------------
-| error | Error | Yes | - | Instance of an Error object.
-
-**model.populate(data)**:Model
-
-> Assigns data to a model.
-
-| Option | Type | Required | Default | Description
-|--------|------|----------|---------|------------
-| data | Object | Yes | - | Data object.
 
 **model.clear()**:Model
 
@@ -397,18 +386,6 @@ try {
 
 > Returns a new model instance which is the exact copy of the original.
 
-**model.toObject()**:Object
-
-> Converts a model into serialized data object.
-
-**model.validate()**
-
-> Validates all model fields and throws a ValidationError if not all fileds are valid.
-
-**model.isValid()**:Promise
-
-> Returns `true` when all model fields are valid.
-
 **model.equalsTo(value)**:Boolean
 
 > Returns `true` when the provided `value` represents an object with the same field values as the original model.
@@ -416,6 +393,34 @@ try {
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
 | value | Object | Yes | - | Data object.
+
+**model.handle(error)**:Error
+
+> If the error isn's an instance of ValidationError, then it tries to create one by using fields handlers. If no errors are found then the original error is returned.
+
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| error | Error | Yes | - | Instance of an Error object.
+
+**model.isValid()**:Promise
+
+> Returns `true` when all model fields are valid.
+
+**model.populate(data)**:Model
+
+> Assigns data to a model.
+
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| data | Object | Yes | - | Data object.
+
+**model.toObject()**:Object
+
+> Converts a model into serialized data object.
+
+**model.validate()**
+
+> Validates all model fields and throws a ValidationError if not all fileds are valid.
 
 ## Example
 

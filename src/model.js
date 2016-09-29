@@ -99,7 +99,8 @@ export function createModel(schema, ctx=null) {
 
       if (isPresent(errors)) {
         return new ValidationError(errors);
-      } else {
+      }
+      else {
         return error;
       }
     }
@@ -167,24 +168,29 @@ export function createModel(schema, ctx=null) {
 
       if (!value) {
         return undefined;
-      } else if (type instanceof Schema) {
+      }
+      else if (type instanceof Schema) {
         return await value._handleFields(error);
-      } else if (isArray(type) && isArray(value)) {
+      }
+      else if (isArray(type) && isArray(value)) {
         let items = [];
 
         for (let v of value) {
           if (type[0] instanceof Schema) {
             if (v) {
               items.push(await v._handleFields(error));
-            } else {
+            }
+            else {
               items.push(undefined);
             }
-          } else {
+          }
+          else {
             items.push(await this._handleValue(error, v, definition));
           }
         }
         return items;
-      } else {
+      }
+      else {
         return undefined;
       }
     }
