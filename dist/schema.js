@@ -30,7 +30,7 @@ class Schema extends schema.Schema {
   */
 
   constructor() {
-    var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     var _ref$mode = _ref.mode;
     let mode = _ref$mode === undefined ? modes.STRICT : _ref$mode;

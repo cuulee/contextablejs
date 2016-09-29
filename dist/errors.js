@@ -45,8 +45,8 @@ class ValidationError extends GeneralError {
   */
 
   constructor() {
-    let fields = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-    let message = arguments.length <= 1 || arguments[1] === undefined ? 'Some fields are not valid.' : arguments[1];
+    let fields = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    let message = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'Some fields are not valid.';
 
     super(message);
     this.fields = fields;
@@ -74,7 +74,7 @@ class ValidationError extends GeneralError {
   */
 
   _fieldsToArray(fields) {
-    let prefix = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+    let prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
     let errors = [];
 

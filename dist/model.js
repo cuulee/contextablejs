@@ -35,7 +35,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 */
 
 function createModel(schema) {
-  let ctx = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+  let ctx = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
   let classMethods = schema.classMethods;
   let classVirtuals = schema.classVirtuals;
   let instanceMethods = schema.instanceMethods;
@@ -137,15 +137,14 @@ function createModel(schema) {
       return (0, _asyncToGenerator3.default)(function* () {
         if (error instanceof _errors.ValidationError) {
           return error;
-        } else {
-          let errors = yield _this2._handleFields(error);
-
-          if ((0, _typeable.isPresent)(errors)) {
-            return new _errors.ValidationError(errors);
-          } else {
-            throw error;
-          }
         }
+
+        let errors = yield _this2._handleFields(error);
+        if ((0, _typeable.isPresent)(errors)) {
+          return new _errors.ValidationError(errors);
+        }
+
+        throw error;
       })();
     }
 

@@ -98,16 +98,13 @@ export function createModel(schema, ctx=null) {
       if (error instanceof ValidationError) {
         return error;
       }
-      else {
-        let errors = await this._handleFields(error);
 
-        if (isPresent(errors)) {
-          return new ValidationError(errors);
-        }
-        else {
-          throw error;
-        }
+      let errors = await this._handleFields(error);
+      if (isPresent(errors)) {
+        return new ValidationError(errors);
       }
+
+      throw error;
     }
 
     /*
