@@ -80,8 +80,8 @@ class ValidationError extends GeneralError {
 
     for (let key in fields) {
       let field = fields[key];
-      let messages = field.messages;
-      let related = field.related;
+      let messages = field.messages,
+          related = field.related;
 
 
       if (messages.length > 0) {

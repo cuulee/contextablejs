@@ -36,10 +36,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function createModel(schema) {
   let ctx = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  let classMethods = schema.classMethods;
-  let classVirtuals = schema.classVirtuals;
-  let instanceMethods = schema.instanceMethods;
-  let instanceVirtuals = schema.instanceVirtuals;
+  let classMethods = schema.classMethods,
+      classVirtuals = schema.classVirtuals,
+      instanceMethods = schema.instanceMethods,
+      instanceVirtuals = schema.instanceVirtuals;
 
   /*
   * Model class template.
@@ -54,8 +54,8 @@ function createModel(schema) {
     constructor() {
       var _arguments = Array.prototype.slice.call(arguments);
 
-      let relatedSchema = _arguments[0];
-      let data = _arguments[1]; // a workaround because a Document constructor has 2 arguments
+      let relatedSchema = _arguments[0],
+          data = _arguments[1]; // a workaround because a Document constructor has 2 arguments
 
       if (!data) {
         data = relatedSchema;
@@ -89,8 +89,8 @@ function createModel(schema) {
 
       for (let name in instanceVirtuals) {
         var _instanceVirtuals$nam = instanceVirtuals[name];
-        let get = _instanceVirtuals$nam.get;
-        let set = _instanceVirtuals$nam.set;
+        let get = _instanceVirtuals$nam.get,
+            set = _instanceVirtuals$nam.set;
 
 
         (0, _defineProperty2.default)(this, name, {
@@ -266,8 +266,8 @@ function createModel(schema) {
 
   for (let name in classVirtuals) {
     var _classVirtuals$name = classVirtuals[name];
-    let get = _classVirtuals$name.get;
-    let set = _classVirtuals$name.set;
+    let get = _classVirtuals$name.get,
+        set = _classVirtuals$name.set;
 
 
     (0, _defineProperty2.default)(Model, name, {
