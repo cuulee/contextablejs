@@ -1,6 +1,7 @@
 import {
   isPresent,
   isArray,
+  isObject,
   isUndefined
 } from 'typeable';
 import {Document} from 'objectschema';
@@ -25,35 +26,27 @@ export function createModel(schema, ctx=null) {
     * Class constructor.
     */
 
-    constructor() {
-      let [relatedSchema, data] = arguments; // a workaround because a Document constructor has 2 arguments
+    constructor(...args) {
+      let [relatedSchema, data] = args; // a workaround because a Document constructor has 2 arguments
       if (!data) {
         data = relatedSchema;
         relatedSchema = schema;
       }
       super(relatedSchema, data);
 
-      Object.defineProperty(this, 'handler', {
-        value: this._createHandler(),
-        enumerable: false // do not expose as object key
+      Object.defineProperty(this, '$handler', {
+        value: this._createHandler()
       });
 
-      Object.defineProperty(this, 'ctx', {
-        get: () => ctx,
-        enumerable: false // do not expose as object key
-      });
-
-      Object.defineProperty(this, 'Model', {
-        get: () => Model,
-        enumerable: false // do not expose as object key
+      Object.defineProperty(this, '$ctx', {
+        value: ctx
       });
 
       for (let name in instanceMethods) {
         let method = instanceMethods[name];
 
         Object.defineProperty(this, name, {
-          value: method,
-          enumerable: false // do not expose as object key
+          value: method
         });
       }
 
@@ -73,19 +66,21 @@ export function createModel(schema, ctx=null) {
     */
 
     _createHandler() {
-      return new Handler(Object.assign({}, this.schema.handlerOptions, {context: this}));
+      return new Handler(Object.assign({}, this.$schema.handlerOptions, {context: this}));
     }
 
     /*
-    * OVERRIDING: Validates all class fields and returns errors.
+    * Validates fields and throws the ValidationError if not all fields are valid.
     */
 
-    async validate() {
-      let errors = await this._validateFields();
+    async approve() {
+      let errors = await this.validate();
 
       if (isPresent(errors)) {
         throw new ValidationError(errors);
       }
+
+      return this;
     }
 
     /*
@@ -115,8 +110,11 @@ export function createModel(schema, ctx=null) {
     async _handleFields(error) {
       let data = {};
 
-      for (let name in this.schema.fields) {
-        let info = await this._handleField(error, name);
+      for (let name in this.$schema.fields) {
+        let value = this[name];
+        let definition = this.$schema.fields[name];
+
+        let info = await this._handleValue(error, value, definition);
 
         if (!isUndefined(info)) {
           data[name] = info;
@@ -127,33 +125,22 @@ export function createModel(schema, ctx=null) {
     }
 
     /*
-    * Handles an error for a specified field.
-    */
-
-    async _handleField(error, name) {
-      let value = this[name];
-      let definition = this.schema.fields[name];
-
-      return await this._handleValue(error, value, definition);
-    }
-
-    /*
     * Handles a value agains the field `definition` object.
     */
 
     async _handleValue(error, value, definition) {
       let data = {};
 
-      data.messages = await this.handler.handle(error, value, definition.handle);
+      data.errors = await this.$handler.handle(error, value, definition.handle);
 
-      let related = await this._handleRelatedObject(error, value, definition);
+      let related = await this._handleRelated(error, value, definition);
       if (related) {
         data.related = related;
       }
 
       let isValid = (
-        data.messages.length === 0
-        && this._isRelatedObjectValid(related)
+        data.errors.length === 0
+        && this._isRelatedValid(related)
       );
       return isValid ? undefined : data;
     }
@@ -162,7 +149,7 @@ export function createModel(schema, ctx=null) {
     * Handles nested data of a value agains the field `definition` object.
     */
 
-    async _handleRelatedObject(error, value, definition) {
+    async _handleRelated(error, value, definition) {
       let {type} = definition;
 
       if (!value) {
@@ -173,15 +160,9 @@ export function createModel(schema, ctx=null) {
       }
       else if (isArray(type) && isArray(value)) {
         let items = [];
-
         for (let v of value) {
           if (type[0] instanceof Schema) {
-            if (v) {
-              items.push(await v._handleFields(error));
-            }
-            else {
-              items.push(undefined);
-            }
+            items.push(v ? await v._handleFields(error) : undefined);
           }
           else {
             items.push(await this._handleValue(error, v, definition));
@@ -194,23 +175,40 @@ export function createModel(schema, ctx=null) {
       }
     }
 
+    /*
+    * Validates a related object of a field (a sub schema).
+    */
+
+    _isRelatedValid (related) {
+      if (isObject(related)) {
+        return Object.values(related).every(v => v.errors.length === 0 && !v.related);
+      }
+      else if (isArray(related)) {
+        return related.every(v => this._isRelatedValid(v));
+      }
+      else {
+        return true;
+      }
+    }
   };
 
   /*
   * Module static properties.
   */
 
-  Object.defineProperty(Model, 'ctx', {
-    get: () => ctx,
-    enumerable: false // do not expose as object key
+  Object.defineProperty(Model, '$ctx', {
+    value: ctx
+  });
+
+  Object.defineProperty(Model, '$schema', {
+    value: schema
   });
 
   for (let name in classMethods) {
     let method = classMethods[name];
 
     Object.defineProperty(Model, name, {
-      value: method.bind({ctx, Model}),
-      enumerable: false // do not expose as object key
+      value: method.bind(Model)
     });
   }
 
@@ -218,8 +216,8 @@ export function createModel(schema, ctx=null) {
     let {get, set} = classVirtuals[name];
 
     Object.defineProperty(Model, name, {
-      get: get ? get.bind({ctx, Model}) : undefined,
-      set: set ? set.bind({ctx, Model}) : undefined,
+      get: get ? get.bind(Model) : undefined,
+      set: set ? set.bind(Model) : undefined,
       enumerable: true // expose as object key
     });
   }

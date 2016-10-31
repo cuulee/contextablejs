@@ -4,6 +4,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _values = require('babel-runtime/core-js/object/values');
+
+var _values2 = _interopRequireDefault(_values);
+
 var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
@@ -52,10 +56,12 @@ function createModel(schema) {
     */
 
     constructor() {
-      var _arguments = Array.prototype.slice.call(arguments);
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
 
-      let relatedSchema = _arguments[0],
-          data = _arguments[1]; // a workaround because a Document constructor has 2 arguments
+      let relatedSchema = args[0],
+          data = args[1]; // a workaround because a Document constructor has 2 arguments
 
       if (!data) {
         data = relatedSchema;
@@ -63,27 +69,19 @@ function createModel(schema) {
       }
       super(relatedSchema, data);
 
-      Object.defineProperty(this, 'handler', {
-        value: this._createHandler(),
-        enumerable: false // do not expose as object key
+      Object.defineProperty(this, '$handler', {
+        value: this._createHandler()
       });
 
-      Object.defineProperty(this, 'ctx', {
-        get: () => ctx,
-        enumerable: false // do not expose as object key
-      });
-
-      Object.defineProperty(this, 'Model', {
-        get: () => Model,
-        enumerable: false // do not expose as object key
+      Object.defineProperty(this, '$ctx', {
+        value: ctx
       });
 
       for (let name in instanceMethods) {
         let method = instanceMethods[name];
 
         (0, _defineProperty2.default)(this, name, {
-          value: method,
-          enumerable: false // do not expose as object key
+          value: method
         });
       }
 
@@ -106,22 +104,24 @@ function createModel(schema) {
     */
 
     _createHandler() {
-      return new _handleable.Handler((0, _assign2.default)({}, this.schema.handlerOptions, { context: this }));
+      return new _handleable.Handler((0, _assign2.default)({}, this.$schema.handlerOptions, { context: this }));
     }
 
     /*
-    * OVERRIDING: Validates all class fields and returns errors.
+    * Validates fields and throws the ValidationError if not all fields are valid.
     */
 
-    validate() {
+    approve() {
       var _this = this;
 
       return (0, _asyncToGenerator3.default)(function* () {
-        let errors = yield _this._validateFields();
+        let errors = yield _this.validate();
 
         if ((0, _typeable.isPresent)(errors)) {
           throw new _errors.ValidationError(errors);
         }
+
+        return _this;
       })();
     }
 
@@ -159,8 +159,11 @@ function createModel(schema) {
       return (0, _asyncToGenerator3.default)(function* () {
         let data = {};
 
-        for (let name in _this3.schema.fields) {
-          let info = yield _this3._handleField(error, name);
+        for (let name in _this3.$schema.fields) {
+          let value = _this3[name];
+          let definition = _this3.$schema.fields[name];
+
+          let info = yield _this3._handleValue(error, value, definition);
 
           if (!(0, _typeable.isUndefined)(info)) {
             data[name] = info;
@@ -172,38 +175,23 @@ function createModel(schema) {
     }
 
     /*
-    * Handles an error for a specified field.
-    */
-
-    _handleField(error, name) {
-      var _this4 = this;
-
-      return (0, _asyncToGenerator3.default)(function* () {
-        let value = _this4[name];
-        let definition = _this4.schema.fields[name];
-
-        return yield _this4._handleValue(error, value, definition);
-      })();
-    }
-
-    /*
     * Handles a value agains the field `definition` object.
     */
 
     _handleValue(error, value, definition) {
-      var _this5 = this;
+      var _this4 = this;
 
       return (0, _asyncToGenerator3.default)(function* () {
         let data = {};
 
-        data.messages = yield _this5.handler.handle(error, value, definition.handle);
+        data.errors = yield _this4.$handler.handle(error, value, definition.handle);
 
-        let related = yield _this5._handleRelatedObject(error, value, definition);
+        let related = yield _this4._handleRelated(error, value, definition);
         if (related) {
           data.related = related;
         }
 
-        let isValid = data.messages.length === 0 && _this5._isRelatedObjectValid(related);
+        let isValid = data.errors.length === 0 && _this4._isRelatedValid(related);
         return isValid ? undefined : data;
       })();
     }
@@ -212,8 +200,8 @@ function createModel(schema) {
     * Handles nested data of a value agains the field `definition` object.
     */
 
-    _handleRelatedObject(error, value, definition) {
-      var _this6 = this;
+    _handleRelated(error, value, definition) {
+      var _this5 = this;
 
       return (0, _asyncToGenerator3.default)(function* () {
         let type = definition.type;
@@ -225,16 +213,11 @@ function createModel(schema) {
           return yield value._handleFields(error);
         } else if ((0, _typeable.isArray)(type) && (0, _typeable.isArray)(value)) {
           let items = [];
-
           for (let v of value) {
             if (type[0] instanceof _schema.Schema) {
-              if (v) {
-                items.push((yield v._handleFields(error)));
-              } else {
-                items.push(undefined);
-              }
+              items.push(v ? yield v._handleFields(error) : undefined);
             } else {
-              items.push((yield _this6._handleValue(error, v, definition)));
+              items.push((yield _this5._handleValue(error, v, definition)));
             }
           }
           return items;
@@ -244,23 +227,38 @@ function createModel(schema) {
       })();
     }
 
+    /*
+    * Validates a related object of a field (a sub schema).
+    */
+
+    _isRelatedValid(related) {
+      if ((0, _typeable.isObject)(related)) {
+        return (0, _values2.default)(related).every(v => v.errors.length === 0 && !v.related);
+      } else if ((0, _typeable.isArray)(related)) {
+        return related.every(v => this._isRelatedValid(v));
+      } else {
+        return true;
+      }
+    }
   };
 
   /*
   * Module static properties.
   */
 
-  Object.defineProperty(Model, 'ctx', {
-    get: () => ctx,
-    enumerable: false // do not expose as object key
+  Object.defineProperty(Model, '$ctx', {
+    value: ctx
+  });
+
+  Object.defineProperty(Model, '$schema', {
+    value: schema
   });
 
   for (let name in classMethods) {
     let method = classMethods[name];
 
     (0, _defineProperty2.default)(Model, name, {
-      value: method.bind({ ctx, Model }),
-      enumerable: false // do not expose as object key
+      value: method.bind(Model)
     });
   }
 
@@ -271,8 +269,8 @@ function createModel(schema) {
 
 
     (0, _defineProperty2.default)(Model, name, {
-      get: get ? get.bind({ ctx, Model }) : undefined,
-      set: set ? set.bind({ ctx, Model }) : undefined,
+      get: get ? get.bind(Model) : undefined,
+      set: set ? set.bind(Model) : undefined,
       enumerable: true // expose as object key
     });
   }

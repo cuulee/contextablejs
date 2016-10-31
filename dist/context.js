@@ -36,9 +36,9 @@ class Context {
       });
     }
 
-    Object.defineProperty(this, 'models', {
+    Object.defineProperty(this, '_models', {
       value: {},
-      enumerable: false // do not expose as object key
+      writable: false // do not expose as object key
     });
   }
 
@@ -47,7 +47,7 @@ class Context {
   */
 
   defineModel(name, schema) {
-    this.models[name] = (0, _model.createModel)(schema, this);
+    this._models[name] = (0, _model.createModel)(schema, this);
     return this.getModel(name);
   }
 
@@ -56,7 +56,7 @@ class Context {
   */
 
   getModel(name) {
-    return this.models[name];
+    return this._models[name];
   }
 
   /*
@@ -64,7 +64,7 @@ class Context {
   */
 
   deleteModel(name) {
-    delete this.models[name];
+    delete this._models[name];
   }
 
 }

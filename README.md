@@ -8,6 +8,27 @@ This is a light weight open source package. It works on the server and in a brow
 
 <img src="giphy.gif" width="300" />
 
+## Features
+
+* Context object
+* Model object
+* Type casting
+* Custom data types
+* Field default value
+* Field value transformation with custom getter and setter
+* Strict and relaxed schemas
+* Nesting with support for self referencing
+* Field change tracking, data commit and rollback
+* Field validation
+* Enhanced error handling
+
+## Related Projects
+
+* [ObjectSchema.js](https://github.com/xpepermint/objectschemajs): Advanced schema enforced JavaScript objects.
+* [Validatable.js](https://github.com/xpepermint/validatablejs): A library for synchronous and asynchronous validation.
+* [Handleable.js](https://github.com/xpepermint/handleablejs): A library for synchronous and asynchronous error handling.
+* [Typeable.js](https://github.com/xpepermint/typeablejs): A library for checking and casting types.
+
 ## Motivation
 
 ### Application Context
@@ -225,12 +246,12 @@ A Schema can also be used as a custom type object. This way you can create a nes
 
 **new Schema({fields, mode, validatorOptions, typeOptions, handlerOptions, classMethods, classVirtuals, instanceMethods, instanceVirtuals)**
 
-> A class for defining document structure.
+> A class for defining model structure.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
-| fields | Object | Yes | - | An object with fields definition.
-| mode | String | No | strict | A schema type (use `relaxed` to allow dynamic fields not defined by the schema).
+| fields | Object | Yes | - | An object with fields definition. You should pass a function which returns the definition object in case of self referencing.
+| strict | Boolean | No | true | A schema type (set to false to allow dynamic fields not defined in schema).
 | validatorOptions | Object | No | validatable.js defaults | Configuration options for the Validator class, provided by the [validatable.js](https://github.com/xpepermint/validatablejs), which is used for field validation.
 | typeOptions | Object | No | typeable.js defaults | Configuration options for the cast method provided by the [typeable.js](https://github.com/xpepermint/typeablejs), which is used for data type casting.
 | handlerOptions | Object | No | handleable.js defaults | Configuration options for the Handler class, provided by the [handleable.js](https://github.com/xpepermint/handleablejs), which is used for field error handling.
@@ -240,8 +261,6 @@ A Schema can also be used as a custom type object. This way you can create a nes
 | instanceVirtuals | Object | No | - | An object defining model's  enumerable virtual properties.
 
 ```js
-export const mode = 'strict'; // schema mode
-
 export const fields = {
   email: { // a field name holding a field definition
     type: 'String', // a field data type provided by typeable.js
@@ -259,6 +278,8 @@ export const fields = {
     }
   },
 };
+
+export const strict = true; // schema mode
 
 export const validatorOptions = {}; // validatable.js configuration options (see the package's page for details)
 
@@ -289,8 +310,8 @@ export const instanceVirtuals = {
 };
 
 export const schema = new Schema({
-  mode,
   fields,
+  strict,
   validatorOptions,
   typeOptions,
   handlerOptions,
@@ -367,60 +388,161 @@ let Model = ctx.defineModel('Model', schema);
 A model provides a unified validation and error handling mechanism.
 
 ```js
-let validationError = null;
+let error = null;
 try {
   await model.validate(); // throw an error when invalid
 }
 catch(e) {
-  validationError = await model.handle(e); // creates a ValidationError from field-related errors or throws the original
+  error = await model.handle(e); // creates a ValidationError from field-related errors or throws the original
 }
-
-let errors = validationError.toArray(); // returns an array of validation errors (toObject() is also available)
+error.toArray(); // returns array of validation errors (toObject() is also available)
 ```
 
-**model.clear()**:Model
+**Model.$ctx**:Context
+
+> Related context instance.
+
+**Model.$schema**:Schema
+
+> Related schema instance.
+
+**Model.prototype.$ctx**:Context
+
+> Related context instance.
+
+**Model.prototype.$handler**:Handler
+
+> Handler instance, used for handling field-related errors.
+
+**Model.prototype.$parent**:Model
+
+> Parent model instance.
+
+**Model.prototype.$schema**:Schema
+
+> Related schema instance.
+
+**Model.prototype.$validator**:Validator
+
+> Validator instance, used for validating fields.
+
+**Model.prototype.approve()**:Model
+
+> The same as `validate()` method but it throws the ValidationError when not all fields are valid.
+
+```js
+let error = null;
+try {
+  user.approve();
+}
+catch (e) {
+  error = user.handle(e);
+}
+```
+
+**Model.prototype.clear()**:Model
 
 > Sets all model fields to `null`.
 
-**model.clone()**:Model
+**Model.prototype.clone()**:Model
 
-> Returns a new model instance which is the exact copy of the original.
+> Returns a new Model instance which is the exact copy of the original.
 
-**model.equalsTo(value)**:Boolean
+**Model.prototype.commit()**:Model
 
-> Returns `true` when the provided `value` represents an object with the same field values as the original model.
+> Sets initial value of each model field to the current value of a field. This is how field change tracking is restarted.
+
+**Model.prototype.equals(value)**:Boolean
+
+> Returns `true` when the provided `value` represents an object with the same fields as the model itself.
+
+**Model.prototype.hasPath(...keys)**:Boolean
+
+> Returns `true` when a field path exists.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
-| value | Object | Yes | - | Data object.
+| keys | Array | Yes | - | List of object keys (e.g. `['book', 0, 'title']`).
 
-**model.handle(error)**:ValidationError
+**Model.prototype.handle(error)**:ValidationError
 
-> If the error isn's an instance of ValidationError, then it tries to create one by using fields handlers. If the method is unable to handle the error, it throws the original error.
+> If the error isn't an instance of ValidationError, then it tries to create one by using fields handlers. If the method is unable to handle the error, it throws the original error.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
 | error | Error | Yes | - | Instance of an Error object.
 
-**model.isValid()**:Promise
+```js
+let error = null;
+try {
+  user.approve();
+}
+catch (e) {
+  error = user.handle(e);
+}
+```
+
+**Model.prototype.isChanged()**:Boolean
+
+> Returns `true` if at least one model field has been changed.
+
+**Model.prototype.isValid()**:Promise
 
 > Returns `true` when all model fields are valid.
 
-**model.populate(data)**:Model
+**Model.prototype.populate(data)**:Model
 
-> Assigns data to a model.
+> Applies data to a model.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
 | data | Object | Yes | - | Data object.
 
-**model.toObject()**:Object
+**Model.prototype.reset()**:Model
+
+> Sets each model field to its default value.
+
+**Model.prototype.rollback()**:Model
+
+> Sets each model field to its initial value (last committed value). This is how you can discharge model changes.
+
+**Model.prototype.toObject()**:Object
 
 > Converts a model into serialized data object.
 
-**model.validate()**
+**Model.prototype.validate()**:Promise(Object)
 
-> Validates model fields and throws a ValidationError if not all fileds are valid.
+> Validates all model fields and returns errors.
+
+```js
+{ // return value example
+  name: { // field value is missing
+    messages: [{validator: 'presence', message: 'is required'}]
+  },
+  book: { // nested object is missing
+    messages: [{validator: 'presence', message: 'is required'}]
+  },
+  address: {
+    messages: [],
+    related: { // nested object errors
+      post: {
+        messages: [{validator: 'presence', message: 'is required'}]
+      }
+    }
+  },
+  friends: { // an array of nested objects has errors
+    messages: [],
+    related: [
+      undefined, // the first item was valid
+      { // the second item has errors
+        name: {
+          messages: [{validator: 'presence', message: 'is required'}]
+        }
+      }
+    ]
+  }
+}
+```
 
 ## Example
 
@@ -449,3 +571,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
+
+## TO-DO
+
+* reference to parent schema in validator
+* track changes (dirty, pristine, previous)
+* validate by field state (dirty, pristine)

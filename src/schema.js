@@ -1,11 +1,12 @@
-import {isObject} from 'typeable';
 import * as schema from 'objectschema/dist/schema';
 
 /*
-* A list of available Schema modes.
+* Validator default options.
 */
 
-export const modes = schema.modes;
+export const handlerDefaults = {
+  errorBuilder: (handler, error, value, {message}) => ({handler, message})
+};
 
 /*
 * A class for defining Model structure and properties.
@@ -17,24 +18,24 @@ export class Schema extends schema.Schema {
   * Class constructor.
   */
 
-  constructor({mode=modes.STRICT, fields={}, validatorOptions={}, typeOptions={}, handlerOptions={}, classMethods={}, classVirtuals={}, instanceMethods={}, instanceVirtuals={}}={}) {
-    super({mode, fields, validatorOptions, typeOptions});
+  constructor({fields={}, strict=true, validatorOptions={}, typeOptions={}, handlerOptions={}, classMethods={}, classVirtuals={}, instanceMethods={}, instanceVirtuals={}}={}) {
+    super({fields, strict, validatorOptions, typeOptions});
 
-    if (!isObject(handlerOptions)) {
-      throw new Error(`Schema handlerOptions key should be an Object`);
-    }
-    if (!isObject(classMethods)) {
-      throw new Error(`Schema classMethods key should be an Object`);
-    }
-    if (!isObject(instanceMethods)) {
-      throw new Error(`Schema instanceMethods key should be an Object`);
-    }
-
-    this.handlerOptions = handlerOptions; // handleable.js configuration options
-    this.classMethods = classMethods; // model class methods
-    this.classVirtuals = classVirtuals; // model class virtual fields
-    this.instanceMethods = instanceMethods; // model instance methods
-    this.instanceVirtuals = instanceVirtuals; // model instance virtual fields
+    Object.defineProperty(this, 'handlerOptions', { // handleable.js configuration options
+      value: Object.assign({}, handlerDefaults, handlerOptions)
+    });
+    Object.defineProperty(this, 'classMethods', { // model class methods
+      value: classMethods
+    });
+    Object.defineProperty(this, 'classVirtuals', { // model class virtual fields
+      value: classVirtuals
+    });
+    Object.defineProperty(this, 'instanceMethods', { // model instance methods
+      value: instanceMethods
+    });
+    Object.defineProperty(this, 'instanceVirtuals', { // model instance virtual fields
+      value: instanceVirtuals
+    });
   }
 
 }

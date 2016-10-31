@@ -46,10 +46,10 @@ export const classMethods = {
   */
 
   async create(input={}) {
-    let model = new this.Model(input);
+    let model = new this(input);
     try {
-      await model.validate();
-      await this.ctx.mongo.collection('users').insertOne(model);
+      await model.approve();
+      await this.$ctx.mongo.collection('users').insertOne(model);
     } catch(e) {
       throw await model.handle(e);
     }
@@ -70,8 +70,8 @@ export const instanceMethods = {
 
   async save() {
     try {
-      await this.validate();
-      await this.ctx.mongo.collection('users').updateOne({_id: this._id}, this, {upsert: true});
+      await this.approve();
+      await this.$ctx.mongo.collection('users').updateOne({_id: this._id}, this, {upsert: true});
     } catch(e) {
       throw await this.handle(e);
     }
