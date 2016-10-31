@@ -10,7 +10,7 @@ export class Context {
   * Class constructor.
   */
 
-  constructor(ctx={}) {
+  constructor (ctx={}) {
 
     for (let name in ctx) {
       let value = ctx[name];
@@ -31,7 +31,7 @@ export class Context {
   * Creates a new Model class and stores it on the context.
   */
 
-  defineModel(name, schema) {
+  defineModel (name, schema) {
     this._models[name] = createModel(schema, this);
     return this.getModel(name);
   }
@@ -40,7 +40,7 @@ export class Context {
   * Creates a new Model class and stores it on the context.
   */
 
-  getModel(name) {
+  getModel (name) {
     return this._models[name];
   }
 
@@ -48,7 +48,7 @@ export class Context {
   * Creates a new Model class and stores it on the context.
   */
 
-  deleteModel(name) {
+  deleteModel (name) {
     delete this._models[name];
   }
 

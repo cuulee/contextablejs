@@ -18,7 +18,7 @@ export class Schema extends schema.Schema {
   * Class constructor.
   */
 
-  constructor({fields={}, strict=true, validatorOptions={}, typeOptions={}, handlerOptions={}, classMethods={}, classVirtuals={}, instanceMethods={}, instanceVirtuals={}}={}) {
+  constructor ({fields={}, strict=true, validatorOptions={}, typeOptions={}, handlerOptions={}, classMethods={}, classVirtuals={}, instanceMethods={}, instanceVirtuals={}}={}) {
     super({fields, strict, validatorOptions, typeOptions});
 
     Object.defineProperty(this, 'handlerOptions', { // handleable.js configuration options

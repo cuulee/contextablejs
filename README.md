@@ -4,7 +4,7 @@
 
 > Simple, unopinionated and minimalist framework for creating context objects with support for unopinionated ORM, object schemas, type casting, validation and error handling.
 
-This is a light weight open source package. It works on the server and in a browser. The source code is available on [GitHub](https://github.com/xpepermint/contextablejs) where you can also find our [issue tracker](https://github.com/xpepermint/contextablejs/issues).
+This is a light weight open source package for use on **server or in browser**. It works on the server and in a browser. The source code is available on [GitHub](https://github.com/xpepermint/contextablejs) where you can also find our [issue tracker](https://github.com/xpepermint/contextablejs/issues).
 
 <img src="giphy.gif" width="300" />
 
@@ -209,7 +209,7 @@ We can now create a model from `userSchema`.
 ctx.defineModel('User', userSchema); // -> User
 ```
 
-Let's take a common scenario and imagine that we write an [Express](http://expressjs.com) route handler, a [Koa](http://koajs.com) controller or maybe a [GraphQL](https://github.com/graphql/graphql-js) mutation, which will save user data into a database. We need to first validate the input, save the input data to a database and then respond with the created object or with a nicely formatted error. Here is how the code will look like.
+Let's take a common scenario and imagine that we are writing an [Express](http://expressjs.com) route handler, a [Koa](http://koajs.com) controller or maybe a [GraphQL](https://github.com/graphql/graphql-js) mutation, which will save user into a database. We need to first validate the input, save the input data to a database and then respond with the created object or with a nicely formatted error. Here is how the code will look like.
 
 ```js
 let User = ctx.getModel('User');
@@ -556,6 +556,15 @@ user.$name; // -> reference to model field instance
 user.$name.isChanged(); // -> calling field instance method
 ```
 
+**Field(document, name)**
+
+> Class which handles each model field.
+
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| document | Model | Yes | - | Instance of a model.
+| name | String | Yes | - | Field name (the same name as used in schema).
+
 **Field.prototype.$document**:Model
 
 > Document instance.
@@ -607,6 +616,66 @@ user.$name.isChanged(); // -> calling field instance method
 **Field.prototype.value**:Any
 
 > A getter and setter for the value of the field.
+
+### ValidationError
+
+Validation error is thrown by some methods which validate fields (e.g. `Model.prototype.validate`).
+
+**ValidationError(data, message)**
+
+> An error class which holds the validation errors.
+
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| data | Model | Yes | - | Validation object (a structure returned by the `Model.prototype.validate`).
+| message | String | No | Some fields are not valid. | Error message.
+| code | Number | No | 422 | Error code number.
+
+```js
+import {ValidationError} from 'contextable';
+
+new ValidationError({
+  name: {
+    errors: [
+      {validator: 'presence', message: 'is required'}
+    ]
+  },
+  friend: {
+    errors: [],
+    related: {
+      name: {
+        errors: [
+          {validator: 'presence', message: 'is required'}
+        ]
+      }
+    }
+  }
+});
+```
+
+**ValidationError.prototype.getErrors(...keys)**:Object
+
+> Returns errors for the specified path.
+
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| keys | Array | Yes | - | List of object keys (e.g. `['book', 0, 'title']`).
+
+**ValidationError.prototype.hasErrors(...keys)**:Boolean
+
+> Returns errors for the specified path.
+
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| keys | Array | Yes | - | List of object keys (e.g. `['book', 0, 'title']`).
+
+**ValidationError.prototype.toArray()**:Array
+
+> Returns error data as an array.
+
+**ValidationError.prototype.toObject()**:Object
+
+> Returns error data as an object.
 
 ## Example
 

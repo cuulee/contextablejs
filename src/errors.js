@@ -1,6 +1,7 @@
 import {
   isUndefined,
-  isArray
+  isArray,
+  isInteger
 } from 'typeable';
 
 /*
@@ -13,7 +14,7 @@ export class GeneralError extends Error {
   * Class constructor.
   */
 
-  constructor(message) {
+  constructor (message) {
     super(message);
 
     Object.defineProperty(this, 'name', {
@@ -40,33 +41,33 @@ export class ValidationError extends GeneralError {
   * Class constructor.
   */
 
-  constructor(fields={}, message='Some fields are not valid.') {
+  constructor (data={}, message='Some fields are not valid.', code=422) {
     super(message);
-    this.fields = fields;
-    this.code = 422;
+    this.data = data;
+    this.code = code;
   }
 
   /*
   * Returns the fields property.
   */
 
-  toObject() {
-    return this.fields;
+  toObject () {
+    return this.data;
   }
 
   /*
   * Converts class fields into an array of errors.
   */
 
-  toArray() {
-    return this._fieldsToArray(this.fields);
+  toArray () {
+    return this._fieldsToArray(this.data);
   }
 
   /*
   * Converts the provided fields into an array of errors.
   */
 
-  _fieldsToArray(fields, prefix=null) {
+  _fieldsToArray (fields, prefix=null) {
     let items = [];
 
     for (let key in fields) {
@@ -99,6 +100,42 @@ export class ValidationError extends GeneralError {
     }
 
     return items;
+  }
+
+  /*
+  * Returns errors array of a field at path.
+  */
+
+  getErrors (...keys) {
+    if (isArray(keys[0])) {
+      keys = keys[0];
+    }
+
+    let fields = this.toObject();
+    let errors = keys.reduce((obj, key, index) => {
+      let error = (obj || {})[key];
+
+      if (!error) {
+        return undefined;
+      }
+      else if (isInteger(key)) {
+        return error;
+      }
+      else {
+        let isLast = index >= keys.length-1;
+        return !isLast ? error.related : error;
+      }
+    }, fields);
+
+    return isUndefined(errors) ? [] : errors.errors;
+  }
+
+  /*
+  * Returns errors array of a field at path.
+  */
+
+  hasErrors (...keys) {
+    return this.getErrors (...keys).length > 0;
   }
 
 }

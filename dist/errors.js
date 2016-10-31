@@ -45,12 +45,13 @@ class ValidationError extends GeneralError {
   */
 
   constructor() {
-    let fields = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    let data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     let message = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'Some fields are not valid.';
+    let code = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 422;
 
     super(message);
-    this.fields = fields;
-    this.code = 422;
+    this.data = data;
+    this.code = code;
   }
 
   /*
@@ -58,7 +59,7 @@ class ValidationError extends GeneralError {
   */
 
   toObject() {
-    return this.fields;
+    return this.data;
   }
 
   /*
@@ -66,7 +67,7 @@ class ValidationError extends GeneralError {
   */
 
   toArray() {
-    return this._fieldsToArray(this.fields);
+    return this._fieldsToArray(this.data);
   }
 
   /*
@@ -105,6 +106,44 @@ class ValidationError extends GeneralError {
     }
 
     return items;
+  }
+
+  /*
+  * Returns errors array of a field at path.
+  */
+
+  getErrors() {
+    for (var _len = arguments.length, keys = Array(_len), _key = 0; _key < _len; _key++) {
+      keys[_key] = arguments[_key];
+    }
+
+    if ((0, _typeable.isArray)(keys[0])) {
+      keys = keys[0];
+    }
+
+    let fields = this.toObject();
+    let errors = keys.reduce((obj, key, index) => {
+      let error = (obj || {})[key];
+
+      if (!error) {
+        return undefined;
+      } else if ((0, _typeable.isInteger)(key)) {
+        return error;
+      } else {
+        let isLast = index >= keys.length - 1;
+        return !isLast ? error.related : error;
+      }
+    }, fields);
+
+    return (0, _typeable.isUndefined)(errors) ? [] : errors.errors;
+  }
+
+  /*
+  * Returns errors array of a field at path.
+  */
+
+  hasErrors() {
+    return this.getErrors(...arguments).length > 0;
   }
 
 }

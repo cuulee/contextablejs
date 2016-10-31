@@ -13,7 +13,7 @@ import {ValidationError} from './errors';
 * Creates a Model class with context.
 */
 
-export function createModel(schema, ctx=null) {
+export function createModel (schema, ctx=null) {
   let {classMethods, classVirtuals, instanceMethods, instanceVirtuals} = schema;
 
   /*
@@ -26,7 +26,7 @@ export function createModel(schema, ctx=null) {
     * Class constructor.
     */
 
-    constructor(...args) {
+    constructor (...args) {
       let [relatedSchema, data] = args; // a workaround because a Document constructor has 2 arguments
       if (!data) {
         data = relatedSchema;
@@ -65,7 +65,7 @@ export function createModel(schema, ctx=null) {
     * Returns a new instance of validator.
     */
 
-    _createHandler() {
+    _createHandler () {
       return new Handler(Object.assign({}, this.$schema.handlerOptions, {context: this}));
     }
 
@@ -73,7 +73,7 @@ export function createModel(schema, ctx=null) {
     * Validates fields and throws the ValidationError if not all fields are valid.
     */
 
-    async approve() {
+    async approve () {
       let errors = await this.validate();
 
       if (isPresent(errors)) {
@@ -89,7 +89,7 @@ export function createModel(schema, ctx=null) {
     * the ValidationError is returned, otherwise the methods throws an error.
     */
 
-    async handle(error) {
+    async handle (error) {
       if (error instanceof ValidationError) {
         return error;
       }
@@ -107,7 +107,7 @@ export function createModel(schema, ctx=null) {
     * documents (where Schema field is null) are ignored!
     */
 
-    async _handleFields(error) {
+    async _handleFields (error) {
       let data = {};
 
       for (let name in this.$schema.fields) {
@@ -128,7 +128,7 @@ export function createModel(schema, ctx=null) {
     * Handles a value agains the field `definition` object.
     */
 
-    async _handleValue(error, value, definition) {
+    async _handleValue (error, value, definition) {
       let data = {};
 
       data.errors = await this.$handler.handle(error, value, definition.handle);
@@ -149,7 +149,7 @@ export function createModel(schema, ctx=null) {
     * Handles nested data of a value agains the field `definition` object.
     */
 
-    async _handleRelated(error, value, definition) {
+    async _handleRelated (error, value, definition) {
       let {type} = definition;
 
       if (!value) {

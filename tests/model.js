@@ -140,7 +140,7 @@ test('method `approve` should throw ValidationError when not all fields are vali
     await user.approve();
   }
   catch(e) {
-    t.deepEqual(e.fields, {
+    t.deepEqual(e.data, {
       name: {
         errors: [{validator: 'presence', message: 'is required'}]
       },
@@ -254,7 +254,7 @@ test('method `handle` should return ValidationError', async (t) => {
   let error = new Error('not found');
   let result = await user.handle(error);
 
-  t.deepEqual(result.fields, {
+  t.deepEqual(result.data, {
     name: {
       errors: [{handler: 'notFound', message: 'not found'}]
     },
