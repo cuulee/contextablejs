@@ -67,16 +67,16 @@ export class ValidationError extends GeneralError {
   */
 
   _fieldsToArray(fields, prefix=null) {
-    let errors = [];
+    let items = [];
 
     for (let key in fields) {
       let field = fields[key];
-      let {messages, related} = field;
+      let {errors, related} = field;
 
-      if (messages.length > 0) {
-        errors.push({
+      if (errors.length > 0) {
+        items.push({
           path: [prefix, key].filter(v => !!v).join('.'),
-          messages
+          errors
         });
       }
 
@@ -85,20 +85,20 @@ export class ValidationError extends GeneralError {
           let item = related[i];
 
           if (!isUndefined(item)) {
-            errors = errors.concat(
+            items = items.concat(
               this._fieldsToArray(item, [prefix, key, i].filter(v => !!v).join('.'))
             );
           }
         }
       }
       else if (related) {
-        errors = errors.concat(
+        items = items.concat(
           this._fieldsToArray(related, [prefix, key].filter(v => !!v).join('.'))
         );
       }
     }
 
-    return errors;
+    return items;
   }
 
 }

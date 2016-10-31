@@ -76,18 +76,18 @@ class ValidationError extends GeneralError {
   _fieldsToArray(fields) {
     let prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
-    let errors = [];
+    let items = [];
 
     for (let key in fields) {
       let field = fields[key];
-      let messages = field.messages,
+      let errors = field.errors,
           related = field.related;
 
 
-      if (messages.length > 0) {
-        errors.push({
+      if (errors.length > 0) {
+        items.push({
           path: [prefix, key].filter(v => !!v).join('.'),
-          messages
+          errors
         });
       }
 
@@ -96,15 +96,15 @@ class ValidationError extends GeneralError {
           let item = related[i];
 
           if (!(0, _typeable.isUndefined)(item)) {
-            errors = errors.concat(this._fieldsToArray(item, [prefix, key, i].filter(v => !!v).join('.')));
+            items = items.concat(this._fieldsToArray(item, [prefix, key, i].filter(v => !!v).join('.')));
           }
         }
       } else if (related) {
-        errors = errors.concat(this._fieldsToArray(related, [prefix, key].filter(v => !!v).join('.')));
+        items = items.concat(this._fieldsToArray(related, [prefix, key].filter(v => !!v).join('.')));
       }
     }
 
-    return errors;
+    return items;
   }
 
 }
