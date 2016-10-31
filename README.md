@@ -544,6 +544,70 @@ catch (e) {
 }
 ```
 
+### Field
+
+When a model field is defined, another field with the same name but prefixed with the `$` sign is set. This special read-only field holds a reference to the actual field instance.
+
+```js
+let User = ctx.getModel('user');
+let user = new User();
+user.name = 'John'; // -> actual model field
+user.$name; // -> reference to model field instance
+user.$name.isChanged(); // -> calling field instance method
+```
+
+**Field.prototype.$document**:Model
+
+> Document instance.
+
+**Field.prototype.$name**:String
+
+> Field name.
+
+**Field.prototype.clear()**:Field
+
+> Sets field and related sub fields to `null`.
+
+**Field.prototype.commit()**:Field
+
+> Sets initial value to the current value. This is how field change tracking is restarted.
+
+**Field.prototype.defaultValue**:Any
+
+> A getter which returns the default field value.
+
+**Field.prototype.equals(value)**:Boolean
+
+> Returns `true` when the provided `value` represents an object that looks the same.
+
+**Field.prototype.initialValue**:Any
+
+> A getter which returns the initial field value (a value from the last commit).
+
+**Field.prototype.isChanged()**:Boolean
+
+> Returns `true` if the field or at least one sub field have been changed.
+
+**Field.prototype.isValid()**:Promise(Boolean)
+
+> Returns `true` if the field and all sub fields are valid.
+
+**Field.prototype.reset()**:Field
+
+> Sets the field to its default value.
+
+**Field.prototype.rollback()**:Field
+
+> Sets the field to its initial value (last committed value). This is how you can discharge field's changes.
+
+**Field.prototype.validate()**:Promise(Object)
+
+> Validates the field and returns errors.
+
+**Field.prototype.value**:Any
+
+> A getter and setter for the value of the field.
+
 ## Example
 
 An example application is available in the `./example` folder. You can start the example by executing the `npm run example` command.
