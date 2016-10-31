@@ -129,18 +129,14 @@ export function createModel (schema, ctx=null) {
     */
 
     async _handleValue (error, value, definition) {
-      let data = {};
-
-      data.errors = await this.$handler.handle(error, value, definition.handle);
-
-      let related = await this._handleRelated(error, value, definition);
-      if (related) {
-        data.related = related;
-      }
+      let data = {
+        errors: await this.$handler.handle(error, value, definition.handle),
+        related: await this._handleRelated(error, value, definition)
+      };
 
       let isValid = (
         data.errors.length === 0
-        && this._isRelatedValid(related)
+        && this._isRelatedValid(data.related)
       );
       return isValid ? undefined : data;
     }

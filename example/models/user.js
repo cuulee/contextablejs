@@ -45,7 +45,7 @@ export const classMethods = {
   * Inserts a new user to a database.
   */
 
-  async create(input={}) {
+  async create (input={}) {
     let model = new this(input);
     try {
       await model.approve();
@@ -68,7 +68,7 @@ export const instanceMethods = {
   * Saves changes to a database.
   */
 
-  async save() {
+  async save () {
     try {
       await this.approve();
       await this.$ctx.mongo.collection('users').updateOne({_id: this._id}, this, {upsert: true});

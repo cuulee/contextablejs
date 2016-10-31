@@ -112,7 +112,7 @@ class ValidationError extends GeneralError {
   * Returns errors array of a field at path.
   */
 
-  getErrors() {
+  get() {
     for (var _len = arguments.length, keys = Array(_len), _key = 0; _key < _len; _key++) {
       keys[_key] = arguments[_key];
     }
@@ -122,7 +122,7 @@ class ValidationError extends GeneralError {
     }
 
     let fields = this.toObject();
-    let errors = keys.reduce((obj, key, index) => {
+    return keys.reduce((obj, key, index) => {
       let error = (obj || {})[key];
 
       if (!error) {
@@ -134,16 +134,14 @@ class ValidationError extends GeneralError {
         return !isLast ? error.related : error;
       }
     }, fields);
-
-    return (0, _typeable.isUndefined)(errors) ? [] : errors.errors;
   }
 
   /*
   * Returns errors array of a field at path.
   */
 
-  hasErrors() {
-    return this.getErrors(...arguments).length > 0;
+  has() {
+    return this.get(...arguments) !== undefined;
   }
 
 }

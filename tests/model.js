@@ -142,19 +142,23 @@ test('method `approve` should throw ValidationError when not all fields are vali
   catch(e) {
     t.deepEqual(e.data, {
       name: {
-        errors: [{validator: 'presence', message: 'is required'}]
+        errors: [{validator: 'presence', message: 'is required'}],
+        related: undefined
       },
       newBook: {
-        errors: [{validator: 'presence', message: 'is required'}]
+        errors: [{validator: 'presence', message: 'is required'}],
+        related: undefined
       },
       newBooks: {
-        errors: [{validator: 'presence', message: 'is required'}]
+        errors: [{validator: 'presence', message: 'is required'}],
+        related: undefined
       },
       oldBook: {
         errors: [],
         related: {
           title: {
-            errors: [{validator: 'presence', message: 'is required'}]
+            errors: [{validator: 'presence', message: 'is required'}],
+            related: undefined
           }
         }
       },
@@ -164,7 +168,8 @@ test('method `approve` should throw ValidationError when not all fields are vali
           undefined,
           {
             title: {
-              errors: [{validator: 'presence', message: 'is required'}]
+              errors: [{validator: 'presence', message: 'is required'}],
+              related: undefined
             }
           }
         ]
@@ -256,10 +261,12 @@ test('method `handle` should return ValidationError', async (t) => {
 
   t.deepEqual(result.data, {
     name: {
-      errors: [{handler: 'notFound', message: 'not found'}]
+      errors: [{handler: 'notFound', message: 'not found'}],
+      related: undefined
     },
     book: {
-      errors: [{handler: 'notFound', message: 'not found'}]
+      errors: [{handler: 'notFound', message: 'not found'}],
+      related: undefined
     },
     books: {
       errors: [{handler: 'notFound', message: 'not found'}],
@@ -267,7 +274,8 @@ test('method `handle` should return ValidationError', async (t) => {
         undefined,
         {
           title: {
-            errors: [{handler: 'notFound', message: 'not found'}]
+            errors: [{handler: 'notFound', message: 'not found'}],
+            related: undefined
           }
         }
       ]

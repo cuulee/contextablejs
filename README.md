@@ -141,12 +141,12 @@ let userSchema = new Schema({
   ...
   classVirtuals: {
     version: { // e.g. User.version
-      get (v) { return `v0.0.1` }
+      get () { return `v0.0.1` }
     }
   },
   instanceVirtuals: {
     name: { // e.g. user.name
-      get (v) { return `${this.firstName} ${this.lastName}` }
+      get () { return `${this.firstName} ${this.lastName}` }
     }
   }
 });
@@ -454,13 +454,21 @@ catch (e) {
 
 > Returns `true` when the provided `value` represents an object with the same fields as the model itself.
 
-**Model.prototype.hasPath(...keys)**:Boolean
+**Model.prototype.get(...keys)**:Field
+
+> Returns a class instance of the field at path.
+
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| keys | Array | Yes | - | Path to a field (e.g. `['book', 0, 'title']`).
+
+**Model.prototype.has(...keys)**:Boolean
 
 > Returns `true` when a field path exists.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
-| keys | Array | Yes | - | List of object keys (e.g. `['book', 0, 'title']`).
+| keys | Array | Yes | - | Path to a field (e.g. `['book', 0, 'title']`).
 
 **Model.prototype.handle(error)**:ValidationError
 
@@ -652,21 +660,21 @@ new ValidationError({
 });
 ```
 
-**ValidationError.prototype.getErrors(...keys)**:Object
+**ValidationError.prototype.get(...keys)**:Object
 
 > Returns errors for the specified path.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
-| keys | Array | Yes | - | List of object keys (e.g. `['book', 0, 'title']`).
+| keys | Array | Yes | - | Path to a field (e.g. `['book', 0, 'title']`).
 
-**ValidationError.prototype.hasErrors(...keys)**:Boolean
+**ValidationError.prototype.has(...keys)**:Boolean
 
 > Returns errors for the specified path.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
-| keys | Array | Yes | - | List of object keys (e.g. `['book', 0, 'title']`).
+| keys | Array | Yes | - | Path to a field (e.g. `['book', 0, 'title']`).
 
 **ValidationError.prototype.toArray()**:Array
 

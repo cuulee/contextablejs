@@ -182,16 +182,12 @@ function createModel(schema) {
       var _this4 = this;
 
       return (0, _asyncToGenerator3.default)(function* () {
-        let data = {};
+        let data = {
+          errors: yield _this4.$handler.handle(error, value, definition.handle),
+          related: yield _this4._handleRelated(error, value, definition)
+        };
 
-        data.errors = yield _this4.$handler.handle(error, value, definition.handle);
-
-        let related = yield _this4._handleRelated(error, value, definition);
-        if (related) {
-          data.related = related;
-        }
-
-        let isValid = data.errors.length === 0 && _this4._isRelatedValid(related);
+        let isValid = data.errors.length === 0 && _this4._isRelatedValid(data.related);
         return isValid ? undefined : data;
       })();
     }

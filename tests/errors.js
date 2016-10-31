@@ -7,7 +7,8 @@ test('method `toObject` of ValidationError should return error object', (t) => {
       errors: [
         {validator: 'presence', message: 'is required'},
         {validator: 'presence', message: 'is not an email'}
-      ]
+      ],
+      related: undefined
     }
   });
 
@@ -20,7 +21,8 @@ test('method `toArray` of ValidationError should return a list of errors', (t) =
       errors: [
         {validator: 'presence', message: 'is required'},
         {validator: 'presence', message: 'is not an email'}
-      ]
+      ],
+      related: undefined
     },
     server: {
       errors: [],
@@ -28,7 +30,8 @@ test('method `toArray` of ValidationError should return a list of errors', (t) =
         address: {
           errors: [
             {validator: 'presence', message: 'is required'}
-          ]
+          ],
+          related: undefined
         }
       }
     },
@@ -39,7 +42,8 @@ test('method `toArray` of ValidationError should return a list of errors', (t) =
           name: {
             errors: [
               {validator: 'presence', message: 'is required'}
-            ]
+            ],
+            related: undefined
           }
         }
       ]
@@ -69,12 +73,13 @@ test('method `toArray` of ValidationError should return a list of errors', (t) =
   ]);
 });
 
-test('method `getErrors` of ValidationError should return field errors', (t) => {
+test('method `get` of ValidationError should return field errors', (t) => {
   let err = new ValidationError({
     name: {
       errors: [
         {validator: 'foo', message: 'bar'}
-      ]
+      ],
+      related: undefined
     },
     friend: {
       errors: [],
@@ -82,7 +87,8 @@ test('method `getErrors` of ValidationError should return field errors', (t) => 
         name: {
           errors: [
             {validator: 'foo', message: 'bar'}
-          ]
+          ],
+          related: undefined
         }
       }
     },
@@ -93,25 +99,36 @@ test('method `getErrors` of ValidationError should return field errors', (t) => 
           name: {
             errors: [
               {validator: 'foo', message: 'bar'}
-            ]
+            ],
+            related: undefined
           }
         }
       ]
     }
   });
 
-  t.deepEqual(err.getErrors('foo', 0, 'bar'), []);
-  t.deepEqual(err.getErrors('name'), [{validator: 'foo', message: 'bar'}]);
-  t.deepEqual(err.getErrors('friend', 'name'), [{validator: 'foo', message: 'bar'}]);
-  t.deepEqual(err.getErrors('friends', 0, 'name'), [{validator: 'foo', message: 'bar'}]);
+  t.deepEqual(err.get('foo', 0, 'bar'), undefined);
+  t.deepEqual(err.get('name'), {
+    errors: [{validator: 'foo', message: 'bar'}],
+    related: undefined
+  });
+  t.deepEqual(err.get('friend', 'name'), {
+    errors: [{validator: 'foo', message: 'bar'}],
+    related: undefined
+  });
+  t.deepEqual(err.get('friends', 0, 'name'), {
+    errors: [{validator: 'foo', message: 'bar'}],
+    related: undefined
+  });
 });
 
-test('method `hasErrors` of ValidationError should return `true` if the provided path has errors', (t) => {
+test('method `has` of ValidationError should return `true` if the provided path has errors', (t) => {
   let err = new ValidationError({
     name: {
       errors: [
         {validator: 'foo', message: 'bar'}
-      ]
+      ],
+      related: undefined
     },
     friend: {
       errors: [],
@@ -119,7 +136,8 @@ test('method `hasErrors` of ValidationError should return `true` if the provided
         name: {
           errors: [
             {validator: 'foo', message: 'bar'}
-          ]
+          ],
+          related: undefined
         }
       }
     },
@@ -130,15 +148,16 @@ test('method `hasErrors` of ValidationError should return `true` if the provided
           name: {
             errors: [
               {validator: 'foo', message: 'bar'}
-            ]
+            ],
+            related: undefined
           }
         }
       ]
     }
   });
 
-  t.deepEqual(err.hasErrors('foo', 0, 'bar'), false);
-  t.deepEqual(err.hasErrors('name'), true);
-  t.deepEqual(err.hasErrors('friend', 'name'), true);
-  t.deepEqual(err.hasErrors('friends', 0, 'name'), true);
+  t.deepEqual(err.has('foo', 0, 'bar'), false);
+  t.deepEqual(err.has('name'), true);
+  t.deepEqual(err.has('friend', 'name'), true);
+  t.deepEqual(err.has('friends', 0, 'name'), true);
 });

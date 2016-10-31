@@ -106,13 +106,13 @@ export class ValidationError extends GeneralError {
   * Returns errors array of a field at path.
   */
 
-  getErrors (...keys) {
+  get (...keys) {
     if (isArray(keys[0])) {
       keys = keys[0];
     }
 
     let fields = this.toObject();
-    let errors = keys.reduce((obj, key, index) => {
+    return keys.reduce((obj, key, index) => {
       let error = (obj || {})[key];
 
       if (!error) {
@@ -126,16 +126,14 @@ export class ValidationError extends GeneralError {
         return !isLast ? error.related : error;
       }
     }, fields);
-
-    return isUndefined(errors) ? [] : errors.errors;
   }
 
   /*
   * Returns errors array of a field at path.
   */
 
-  hasErrors (...keys) {
-    return this.getErrors (...keys).length > 0;
+  has (...keys) {
+    return this.get(...keys) !== undefined;
   }
 
 }
