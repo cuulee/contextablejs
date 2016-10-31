@@ -4,7 +4,7 @@
 
 > Simple, unopinionated and minimalist framework for creating context objects with support for unopinionated ORM, object schemas, type casting, validation and error handling.
 
-This is a light weight open source package for use on **server or in browser**. It works on the server and in a browser. The source code is available on [GitHub](https://github.com/xpepermint/contextablejs) where you can also find our [issue tracker](https://github.com/xpepermint/contextablejs/issues).
+This is a light weight open source package for use on **server or in browser**. The source code is available on [GitHub](https://github.com/xpepermint/contextablejs) where you can also find our [issue tracker](https://github.com/xpepermint/contextablejs/issues).
 
 <img src="giphy.gif" width="300" />
 
@@ -37,15 +37,15 @@ This is a light weight open source package for use on **server or in browser**. 
 
 Node.js gives us freedom which allows for different applications and multiple instances of the same application to be started in the same process. This means that all services in this case share the same application context which is not desirable and many times seriously dangerous. This freedom doesn't come without sacrifices. Not having a unified application context is a very big problem and writing a long-term sustainable code becomes a challenge.
 
-Wouldn't be nice if we could create an application context object for each application and we would simple send it down to application objects when the application is created and the application would magically work isolated from other applications in the process. The application in this case becomes a configurable component thus we can run multiple instances of the same application, with different contexts, within the same process.
+Wouldn't be nice if we could create an application context object for each application and we would simple send it down to the application objects (when the application is created) and the application would magically work isolated from other applications in the process. The application in this case becomes a configurable component thus we can run multiple instances of the same application, with different contexts, within the same process.
 
-This is one of the core features of *Contextable.js*. The idea is not drastically new but brings a different prospective of what an application is and how ti works. Did you know, that the JavaScript implementation of [GraphQL](https://github.com/graphql/graphql-js) adopts this concept - you send a context to GraphQL resolvers by passing it as an argument to the `graphql` method? There are other examples, for sure.
+This is one of the core features of *Contextable.js*. The idea is not drastically new but brings a different prospective of what an application is and how ti works. [GraphQL](https://github.com/graphql/graphql-js) also adopts this concept - you send a context to GraphQL resolvers by passing it as an argument to the `graphql` method. There are other examples, for sure.
 
 ### Unopinionated ORM
 
 Almost all monolithic frameworks provide some sort of ORM (e.g. ActiveRecord) for easy data manipulation where the magic does all the heavy database stuff. Good and flexible ORM is the crucial added value for a developer. Good JavaScript ORMs also handle data type casting for us thus the object values always have the desired data type. Beside that and all other goodies, things get complicated if multiple database adapters are needed. None of these solutions expect that a single model would need to use two or more different databases at the same time within the same model. All models are supposed to use a single database adapter.
 
-In Node.js environment you can find super duper ORM packages like [mongoose](http://mongoosejs.com/), [sequelize](sequelizejs.com), [bookshelf](http://bookshelfjs.org/) and so on. You can get pretty good layer of functionality as with popular monolithic frameworks like Ruby on Rails, but you still don't have a unified ORM system and your models are always locked to a specific database adapter.
+In Node.js environment you can find super duper ORM packages like [mongoose](http://mongoosejs.com/), [sequelize](sequelizejs.com) and  [bookshelf](http://bookshelfjs.org/). You can get pretty good layer of functionality as with popular monolithic frameworks like Ruby on Rails, but you still don't have a unified ORM system and your models are always locked to a specific database adapter.
 
 *Contextable.js* is unopinionated ORM, offering tools for building unopinionated, context-aware models. Models share the same (application) context and thus can use all features attached to a context. This means that if you attach [MongoDB](https://github.com/mongodb/node-mongodb-native) and [ElasticSearch](https://github.com/elastic/elasticsearch-js) connectors to a context your models will be able to use both of them at the same time. You can add whatever you need to a context and all that features are automagically available in all you models.
 
@@ -55,7 +55,7 @@ Data validation and error handling is a common thing when writing API controller
 
 ORM frameworks usually provide object validation out of the box. What about error handling? Isn't that pretty similar thing? Validation happens before actual action and error handling happens afterwords thus validation and error handling go hand in hand. *Contextable.js* has been written with that in mind.
 
-Let's take a real life use case where we are inserting books with unique names into a MongoDB collection. We validate each book before we write anything into a database. To be safe, we also validate that a book with the provided name does not exists in a database. If the book object isn't valid we show nicely formatted error message to a user telling what went wrong. When the object is valid we write it to the database. Will the operation always succeed? Maybe yes, sometimes no. We can expect at least the `E11000` MongoDB error. This is because validation and write operation do not execute in atomic way. In case of a database error, we again want to show a nicely formatted error message to a user. This means that we need to write two error handling mechanisms for pretty much the same thing.
+Let's take a real life use case where we are inserting books with unique names into a MongoDB collection. We validate each book before we write anything into a database. To be safe, we also validate that a book with the provided name does not exists in a database. If the book object isn't valid we show a nicely formatted error message to a user telling what went wrong. When the object is valid we write it to the database. Will the operation always succeed? Maybe yes, sometimes no. We can expect at least the `E11000` MongoDB error. This is because validation and write operation do not execute in atomic way. In case of a database error, we again want to show a nicely formatted error message to a user. This means that we need to write two error handling mechanisms for pretty much the same thing.
 
 *Contextable.js* unifies validation and error handling. We can handle validation and other field-related errors in a single way. We only need to tell *Contextable.js* which errors to be handled and how to be handled, *Contextable.js* will do the rest.
 
@@ -71,7 +71,7 @@ $ npm install --save contextable
 
 Below, we create a simple example to show the benefit of using `Contextable.js` in your [Node.js](https://nodejs.org) project. In this tutorial we create a new context instance with a User model attached, then we insert a user document in a [MongoDB](https://www.mongodb.com) database. The example also explains the concept of validation and error handling.
 
-To make things easy to read, we use [Babel](https://babeljs.io/), thus we can write ES6+ syntax and wrap our code into the `async` block.
+To make things easy to read, we use ES6+ syntax and wrap our code into the `async` block.
 
 ```js
 (async function() {
@@ -141,12 +141,12 @@ let userSchema = new Schema({
   ...
   classVirtuals: {
     version: { // e.g. User.version
-      get: (v) => `v0.0.1`
+      get (v) { return `v0.0.1` }
     }
   },
   instanceVirtuals: {
     name: { // e.g. user.name
-      get: (v) => `${this.firstName} ${this.lastName}`
+      get (v) { return `${this.firstName} ${this.lastName}` }
     }
   }
 });
@@ -158,22 +158,21 @@ Schema holds information about class and instance methods. We can define whateve
 let userSchema = new Schema({
   ...
   classMethods: {
-    async count: (id) => {
-      return await this.ctx.mongo.collection('users').count();
+    async count (id) {
+      return await this.$ctx.mongo.collection('users').count();
     }
   },
   instanceMethods: {
-    async insert: (v) => {
-      let res = await this.ctx.mongo.collection('users').insertOne(this);
-      return this.populate(res[0]);
+    async insert (v) {
+      return await this.$ctx.mongo.collection('users').insertOne(this);
     }
   }
 });
 ```
 
-Where did the `this.ctx.mongo` came from? Models are context-aware documents and this is how you access application context to which a model belongs to. Before we create a context let's define some handlers for handling field-related errors.
+Where did the `this.$ctx.mongo` came from? Models are context-aware documents and this is how you access application context to which a model belongs to. Before we create a context, let's define some handlers for handling field-related errors.
 
-It's not a coincident that we use [MongoDB](http://mongodb.github.io/node-mongodb-native/) in this tutorial. How to use the MongoDB driver and how to create a unique index is out of scope for this tutorial, but before you continue make sure, that you have a `unique` `sparse` index named `uniqueFirstName` for the `firstName` field defined on the `users` collection. When the `insert` method, which we defined earlier, is triggered for the second time, MongoDB will triggers the `E11000` error and our handler will catch it and convert it into a validation error. *Contextable.js* comes with some pre-build handlers and `mongoUniqueness` is one of them.
+It's not a coincident that we use [MongoDB](http://mongodb.github.io/node-mongodb-native/) in this tutorial. How to use the MongoDB driver and how to create a unique index is out of scope for this tutorial, but before you continue make sure, that you have a `unique`, `sparse` index named `uniqueFirstName` for the `firstName` field defined on the `users` collection. When the `insert` method, which we defined earlier, is triggered for the second time, MongoDB will triggers the `E11000` error and our handler will catch it and convert it into a validation error. *Contextable.js* comes with some pre-build handlers and `mongoUniqueness` is one of them.
 
 ```js
 let userSchema = new Schema({
@@ -192,7 +191,7 @@ let userSchema = new Schema({
 });
 ```
 
-Continue by creating a context with a [MongoDB connector](http://mongodb.github.io/node-mongodb-native/) attached as `mongo` variab.
+Continue by creating a context with a [MongoDB connector](http://mongodb.github.io/node-mongodb-native/) attached as `mongo` variable.
 
 ```js
 import {MongoClient} from 'mongodb';
@@ -223,28 +222,28 @@ let user = new User({
 let error = null;
 let data = null;
 try {
-  await user.validate(); // throws a ValidationError when fields are invalid
+  await user.approve(); // throws a ValidationError when fields are invalid
   data = await user.insert(); // saves input data to a database
 }
 catch(e) {
   error = await user.handle(e); // creates a ValidationError from field-related errors or throws the original
 }
-// so something with data or error ...
+// do something with data or error ...
 ```
 
 ## API
 
-*Contextable.js* is built on top of [objectschema.js](https://github.com/xpepermint/objectschemajs) package which uses [typeable.js](https://github.com/xpepermint/typeablejs) for type casting, [validatable.js](https://github.com/xpepermint/validatablejs) for fields validation and [handleable.js](https://github.com/xpepermint/handleablejs) for handling field-related errors.
+*Contextable.js* is built on top of [ObjectSchema.js](https://github.com/xpepermint/objectschemajs) which uses [Typeable.js](https://github.com/xpepermint/typeablejs) for type casting, [Validatable.js](https://github.com/xpepermint/validatablejs) for fields validation and [Handleable.js](https://github.com/xpepermint/handleablejs) for handling field-related errors.
 
-It provides two core classes. The `Schema` class represents a configuration object for defining context-aware models and the `Context` represents an unopinionated ORM framework.
+It provides two core classes. The `Schema` class represents a configuration object for defining context-aware models and the `Context` represents the application context and an unopinionated ORM framework.
 
 ### Schema
 
-Schema represents a configuration object from which a Model class can be created. It holds information about fields, type casting, how fields are validated, how errors are handled and what the default values are. It also holds model's class methods, instance methods, class virtual fields and instance virtual fields.
+Schema represents a configuration object from which a `Model` can be created. It holds information about fields, type casting, how fields are validated, how errors are handled and what the default values are. It also holds model's class methods, instance methods, class virtual fields and instance virtual fields.
 
-A Schema can also be used as a custom type object. This way you can create a nested data structure by setting a schema instance for a field `type`. When a model is created, each schema in a tree of fields will become an instance of a Model - a tree of models.
+A Schema can also be used as a custom type object. This way you can create a nested data structure by setting a schema instance for a field `type`. When a model is created, each schema in a tree of fields will become an instance of a Model - thus we get a tree of models.
 
-**new Schema({fields, mode, validatorOptions, typeOptions, handlerOptions, classMethods, classVirtuals, instanceMethods, instanceVirtuals)**
+**new Schema({fields, strict, validatorOptions, typeOptions, handlerOptions, classMethods, classVirtuals, instanceMethods, instanceVirtuals)**
 
 > A class for defining model structure.
 
@@ -322,15 +321,15 @@ export const schema = new Schema({
 });
 ```
 
-This package uses [typeable.js](https://github.com/xpepermint/typeablejs) for data type casting. Many common data types and array types are supported but we can also define custom types or override existing types through a `typeOptions` key. Please check package's website for a list of supported types and further information.
+This package uses [Typeable.js](https://github.com/xpepermint/typeablejs) for data type casting. Many common data types and array types are supported but we can also define custom types or override existing types through a `typeOptions` key. Please check package's website for a list of supported types and further information.
 
 By default, all fields in a schema are set to `null`. We can set a default value for a field by setting the `defaultValue` option.
 
-Field validation is handled by the [validatable.js](https://github.com/xpepermint/validatablejs) package. We can configure the package by passing the `validatorOptions` option to our schema which will be passed directly to the `Validator` class. The package provides many built-in validators, allows adding custom validators and overriding existing ones. When a document is created all validator methods share document's context thus we can write context-aware checks. Please check package's website for details.
+Field validation is handled by the [Validatable.js](https://github.com/xpepermint/validatablejs) package. We can configure the validator by passing the `validatorOptions` option to our schema which will be passed directly to the `Validator` class. The package provides many built-in validators, allows adding custom validators and overriding existing ones. When a document is created all validator methods share document's context thus we can write context-aware checks. Please check package's website for details.
 
-*Contextable.js* has a unique concept of handling field-related errors. It uses the [handleable.js](https://github.com/xpepermint/handleablejs) under the hood. We can configure the package by passing the `handlerOptions` key to our schema which will be passed directly to the `Handler` class. The package already provides some built-in handlers, it allows adding custom handlers and overriding existing ones. When a document is created all handlers share document's context thus we can write context-aware checks. Please check package's website for further information.
+*Contextable.js* has a unique concept of handling field-related errors. It uses the [Handleable.js](https://github.com/xpepermint/handleablejs) under the hood. We can configure the handler by passing the `handlerOptions` key to our schema which will be passed directly to the `Handler` class. The package already provides some built-in handlers, it allows adding custom handlers and overriding existing ones. When a document is created all handlers share document's context thus we can write context-aware checks. Please check package's website for further information.
 
-Schema also holds information about model's class methods, instance methods, class virtual fields and instance virtual fields. You can define synchronous or asynchronous, class and instance methods. All model properties are context-aware and you can access the context through the `this.ctx` getter.
+Schema also holds information about model's class methods, instance methods, class virtual fields and instance virtual fields. You can define synchronous or asynchronous, class and instance methods. All model properties are context-aware and you can access the context through the `this.$ctx` getter.
 
 ### Context
 
@@ -379,7 +378,7 @@ const ctx = new Context({
 
 ### Model
 
-A model is unopinionated, context-aware and schema enforced data object. It represents a class, which is dynamically built from a schema. A model is an upgraded [Document](https://github.com/xpepermint/objectschemajs#document) class, provided by the underlying [objectschema.js](https://github.com/xpepermint/objectschemajs) package, with custom class methods, enumerable class properties, instance methods and enumerable instance properties.
+A model is unopinionated, context-aware and schema enforced data object. It represents a class, which is dynamically built from a schema. A model is an upgraded [Document](https://github.com/xpepermint/objectschemajs#document) class, provided by the underlying [ObjectSchema.js](https://github.com/xpepermint/objectschemajs) package, with custom class methods, enumerable class properties, instance methods and enumerable instance properties.
 
 ```js
 let Model = ctx.defineModel('Model', schema);
@@ -390,12 +389,11 @@ A model provides a unified validation and error handling mechanism.
 ```js
 let error = null;
 try {
-  await model.validate(); // throw an error when invalid
+  await model.approve(); // throw an error when invalid
 }
 catch(e) {
   error = await model.handle(e); // creates a ValidationError from field-related errors or throws the original
 }
-error.toArray(); // returns array of validation errors (toObject() is also available)
 ```
 
 **Model.$ctx**:Context
@@ -428,7 +426,7 @@ error.toArray(); // returns array of validation errors (toObject() is also avail
 
 **Model.prototype.approve()**:Model
 
-> The same as `validate()` method but it throws the ValidationError when not all fields are valid.
+> The same as method `validate()` but it throws the `ValidationError` when not all fields are valid.
 
 ```js
 let error = null;
@@ -546,11 +544,12 @@ catch (e) {
 
 ### Field
 
-When a model field is defined, another field with the same name but prefixed with the `$` sign is set. This special read-only field holds a reference to the actual field instance.
+When a field is defined on a model, another field with the same name but prefixed with the `$` is set. This special read-only field holds a reference to the actual field's class instance.
 
 ```js
 let User = ctx.getModel('user');
 let user = new User();
+
 user.name = 'John'; // -> actual model field
 user.$name; // -> reference to model field instance
 user.$name.isChanged(); // -> calling field instance method
@@ -567,7 +566,7 @@ user.$name.isChanged(); // -> calling field instance method
 
 **Field.prototype.$document**:Model
 
-> Document instance.
+> Model instance.
 
 **Field.prototype.$name**:String
 
@@ -619,7 +618,7 @@ user.$name.isChanged(); // -> calling field instance method
 
 ### ValidationError
 
-Validation error is thrown by some methods which validate fields (e.g. `Model.prototype.validate`).
+Validation error is thrown by some methods which validate fields (e.g. `Model.prototype.approve`).
 
 **ValidationError(data, message)**
 
@@ -627,7 +626,7 @@ Validation error is thrown by some methods which validate fields (e.g. `Model.pr
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
-| data | Model | Yes | - | Validation object (a structure returned by the `Model.prototype.validate`).
+| data | Model | Yes | - | Validation object (an object which is returned by the `Model.prototype.validate`).
 | message | String | No | Some fields are not valid. | Error message.
 | code | Number | No | 422 | Error code number.
 

@@ -11,7 +11,7 @@ export class ApplicationContext extends Context {
   * Class constructor.
   */
 
-  constructor(attrs) {
+  constructor (attrs) {
     super(attrs);
 
     // initializing variables
@@ -24,7 +24,7 @@ export class ApplicationContext extends Context {
   * A getter which returns a MongoDB connection instance.
   */
 
-  get mongo() {
+  get mongo () {
     return this._mongo;
   }
 
@@ -32,7 +32,7 @@ export class ApplicationContext extends Context {
   * Starts context services.
   */
 
-  async start() {
+  async start () {
     if (!this._mongo) {
       this._mongo = await MongoClient.connect('mongodb://localhost:27017/test');
 
@@ -48,7 +48,7 @@ export class ApplicationContext extends Context {
   * Stops context services.
   */
 
-  async stop() {
+  async stop () {
     if (this._mongo) {
       this._mongo.close();
       this._mongo = null;

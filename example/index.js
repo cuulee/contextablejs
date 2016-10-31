@@ -1,6 +1,6 @@
 import {ApplicationContext} from './context';
 
-(async function() {
+(async function () {
 
   // initializing and starting application context
   let ctx = new ApplicationContext();
