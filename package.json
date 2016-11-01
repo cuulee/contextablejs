@@ -1,6 +1,6 @@
 {
   "name": "contextable",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Simple, unopinionated and minimalist framework for creating context objects with support for unopinionated ORM, object schemas, type casting, validation and error handling and more.",
   "main": "./dist/index.js",
   "ava": {
@@ -49,11 +49,21 @@
     "error",
     "errors",
     "handling",
+    "handle",
     "valid",
     "validate",
     "validation",
+    "validator",
+    "validating",
+    "form",
     "type",
-    "cast"
+    "cast",
+    "casting",
+    "history",
+    "tracking",
+    "change",
+    "field",
+    "fields"
   ],
   "author": "Kristijan Sedlak (Xpepermint)",
   "license": "MIT",

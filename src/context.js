@@ -11,45 +11,40 @@ export class Context {
   */
 
   constructor (context={}) {
-
     for (let name in context) {
-      let value = context[name];
-
-      Object.defineProperty(this, name, {
-        get: () => value,
-        enumerable: true // do not expose as object key
+      this.defineProperty(name, {
+        get: () => context[name],
+        enumerable: true
       });
     }
+  }
 
-    Object.defineProperty(this, '_models', {
-      value: {},
-      writable: false // do not expose as object key
+  /*
+  * Defines a new property directly on the context object.
+  */
+
+  defineProperty (name, descriptor) {
+    Object.defineProperty(this, name, descriptor);
+
+    return this[name];
+  }
+
+  /*
+  * Creates a new Model class and stores it on the context.
+  */
+
+  defineModel (name, schema, options={}) {
+    let model = createModel(schema, this);
+
+    let descriptor = Object.assign({
+      enumerable: true
+    }, options, {
+      get: () => model
     });
-  }
+    delete descriptor.set;
+    delete descriptor.value;
 
-  /*
-  * Creates a new Model class and stores it on the context.
-  */
-
-  defineModel (name, schema) {
-    this._models[name] = createModel(schema, this);
-    return this.getModel(name);
-  }
-
-  /*
-  * Creates a new Model class and stores it on the context.
-  */
-
-  getModel (name) {
-    return this._models[name];
-  }
-
-  /*
-  * Creates a new Model class and stores it on the context.
-  */
-
-  deleteModel (name) {
-    delete this._models[name];
+    return this.defineProperty(name, descriptor);
   }
 
 }

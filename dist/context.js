@@ -5,6 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Context = undefined;
 
+var _assign = require('babel-runtime/core-js/object/assign');
+
+var _assign2 = _interopRequireDefault(_assign);
+
 var _defineProperty = require('babel-runtime/core-js/object/define-property');
 
 var _defineProperty2 = _interopRequireDefault(_defineProperty);
@@ -26,20 +30,22 @@ class Context {
   constructor() {
     let context = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-
     for (let name in context) {
-      let value = context[name];
-
-      (0, _defineProperty2.default)(this, name, {
-        get: () => value,
-        enumerable: true // do not expose as object key
+      this.defineProperty(name, {
+        get: () => context[name],
+        enumerable: true
       });
     }
+  }
 
-    Object.defineProperty(this, '_models', {
-      value: {},
-      writable: false // do not expose as object key
-    });
+  /*
+  * Defines a new property directly on the context object.
+  */
+
+  defineProperty(name, descriptor) {
+    (0, _defineProperty2.default)(this, name, descriptor);
+
+    return this[name];
   }
 
   /*
@@ -47,24 +53,19 @@ class Context {
   */
 
   defineModel(name, schema) {
-    this._models[name] = (0, _model.createModel)(schema, this);
-    return this.getModel(name);
-  }
+    let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-  /*
-  * Creates a new Model class and stores it on the context.
-  */
+    let model = (0, _model.createModel)(schema, this);
 
-  getModel(name) {
-    return this._models[name];
-  }
+    let descriptor = (0, _assign2.default)({
+      enumerable: true
+    }, options, {
+      get: () => model
+    });
+    delete descriptor.set;
+    delete descriptor.value;
 
-  /*
-  * Creates a new Model class and stores it on the context.
-  */
-
-  deleteModel(name) {
-    delete this._models[name];
+    return this.defineProperty(name, descriptor);
   }
 
 }

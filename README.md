@@ -351,30 +351,38 @@ const context = new Context({
 });
 ```
 
-**context.defineModel('name', schema)**:Model
+**context.defineProperty(name, descriptor)**:Any
 
-> Creates a new context-aware model.
+> Defines a new property directly on the context object.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
 | name | String | Yes | - | A name representing a name of a model.
-| schema | Schema | Yes | - | An instance of the Schema class.
+| descriptor | Object | Yes | - | The [descriptor](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty#Description) for the property being defined or modified.
 
-**context.getModel('name')**:Model
+```js
+context.defineProperty('memorize', {
+  value: 'This is awesome.',
+  enumerable: true
+});
+```
 
-> Returns a Model class.
+**context.defineModel(name, schema, options)**:Any
+
+> Defines a new context-aware model directly on the context object.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
-| name | String | Yes | - | Model name.
+| name | String | Yes | - | The name of a model.
+| schema | Schema | Yes | - | An instance of Schema.
+| options | Object | No | {} | The [descriptor](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty#Description) options for the property being defined or modified (except options `value`, `get` and `set`).
 
-**context.deleteModel('name')**
-
-> Deletes a Model class from a context.
-
-| Option | Type | Required | Default | Description
-|--------|------|----------|---------|------------
-| name | String | Yes | - | Model name.
+```js
+context.defineProperty('memorize', {
+  value: 'This is awesome.',
+  enumerable: true
+});
+```
 
 ### Model
 
