@@ -159,18 +159,18 @@ let userSchema = new Schema({
   ...
   classMethods: {
     async count (id) {
-      return await this.$ctx.mongo.collection('users').count();
+      return await this.$context.mongo.collection('users').count();
     }
   },
   instanceMethods: {
     async insert (v) {
-      return await this.$ctx.mongo.collection('users').insertOne(this);
+      return await this.$context.mongo.collection('users').insertOne(this);
     }
   }
 });
 ```
 
-Where did the `this.$ctx.mongo` came from? Models are context-aware documents and this is how you access application context to which a model belongs to. Before we create a context, let's define some handlers for handling field-related errors.
+Where did the `this.$context.mongo` came from? Models are context-aware documents and this is how you access application context to which a model belongs to. Before we create a context, let's define some handlers for handling field-related errors.
 
 It's not a coincident that we use [MongoDB](http://mongodb.github.io/node-mongodb-native/) in this tutorial. How to use the MongoDB driver and how to create a unique index is out of scope for this tutorial, but before you continue make sure, that you have a `unique`, `sparse` index named `uniqueFirstName` for the `firstName` field defined on the `users` collection. When the `insert` method, which we defined earlier, is triggered for the second time, MongoDB will triggers the `E11000` error and our handler will catch it and convert it into a validation error. *Contextable.js* comes with some pre-build handlers and `mongoUniqueness` is one of them.
 
@@ -199,19 +199,19 @@ import {Context} from 'contextable';
 
 let mongo = await MongoClient.connect('mongodb://localhost:27017/test');
 
-let ctx = new Context({mongo});
+let context = new Context({mongo});
 ```
 
 We can now create a model from `userSchema`.
 
 ```js
-ctx.defineModel('User', userSchema); // -> User
+context.defineModel('User', userSchema); // -> User
 ```
 
 Let's take a common scenario and imagine that we are writing an [Express](http://expressjs.com) route handler, a [Koa](http://koajs.com) controller or maybe a [GraphQL](https://github.com/graphql/graphql-js) mutation, which will save user into a database. We need to first validate the input, save the input data to a database and then respond with the created object or with a nicely formatted error. Here is how the code will look like.
 
 ```js
-let User = ctx.getModel('User');
+let User = context.getModel('User');
 
 let user = new User({
   firstName: 'John',
@@ -329,7 +329,7 @@ Field validation is handled by the [Validatable.js](https://github.com/xpepermin
 
 *Contextable.js* has a unique concept of handling field-related errors. It uses the [Handleable.js](https://github.com/xpepermint/handleablejs) under the hood. We can configure the handler by passing the `handlerOptions` key to our schema which will be passed directly to the `Handler` class. The package already provides some built-in handlers, it allows adding custom handlers and overriding existing ones. When a document is created all handlers share document's context thus we can write context-aware checks. Please check package's website for further information.
 
-Schema also holds information about model's class methods, instance methods, class virtual fields and instance virtual fields. You can define synchronous or asynchronous, class and instance methods. All model properties are context-aware and you can access the context through the `this.$ctx` getter.
+Schema also holds information about model's class methods, instance methods, class virtual fields and instance virtual fields. You can define synchronous or asynchronous, class and instance methods. All model properties are context-aware and you can access the context through the `this.$context` getter.
 
 ### Context
 
@@ -344,14 +344,14 @@ Context is an object, holding application-related configuration data, data adapt
 | props | Object | No | - | Enumerable properties which will be applied to a context.
 
 ```js
-const ctx = new Context({
+const context = new Context({
   version: '1.2.3', // example variable
   mongo: mongoose.connect('mongodb://localhost/test'), // example variable
   session: req.session // example variable
 });
 ```
 
-**ctx.defineModel('name', schema)**:Model
+**context.defineModel('name', schema)**:Model
 
 > Creates a new context-aware model.
 
@@ -360,7 +360,7 @@ const ctx = new Context({
 | name | String | Yes | - | A name representing a name of a model.
 | schema | Schema | Yes | - | An instance of the Schema class.
 
-**ctx.getModel('name')**:Model
+**context.getModel('name')**:Model
 
 > Returns a Model class.
 
@@ -368,7 +368,7 @@ const ctx = new Context({
 |--------|------|----------|---------|------------
 | name | String | Yes | - | Model name.
 
-**ctx.deleteModel('name')**
+**context.deleteModel('name')**
 
 > Deletes a Model class from a context.
 
@@ -381,7 +381,7 @@ const ctx = new Context({
 A model is unopinionated, context-aware and schema enforced data object. It represents a class, which is dynamically built from a schema. A model is an upgraded [Document](https://github.com/xpepermint/objectschemajs#document) class, provided by the underlying [ObjectSchema.js](https://github.com/xpepermint/objectschemajs) package, with custom class methods, enumerable class properties, instance methods and enumerable instance properties.
 
 ```js
-let Model = ctx.defineModel('Model', schema);
+let Model = context.defineModel('Model', schema);
 ```
 
 A model provides a unified validation and error handling mechanism.
@@ -396,7 +396,7 @@ catch(e) {
 }
 ```
 
-**Model.$ctx**:Context
+**Model.$context**:Context
 
 > Related context instance.
 
@@ -404,7 +404,7 @@ catch(e) {
 
 > Related schema instance.
 
-**Model.prototype.$ctx**:Context
+**Model.prototype.$context**:Context
 
 > Related context instance.
 
@@ -553,7 +553,7 @@ catch (err) {
 When a field is defined on a model, another field with the same name but prefixed with the `$` is set. This special read-only field holds a reference to the actual field's class instance.
 
 ```js
-let User = ctx.getModel('user');
+let User = context.getModel('user');
 let user = new User();
 
 user.name = 'John'; // -> actual model field

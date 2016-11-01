@@ -24,11 +24,11 @@ class Context {
   */
 
   constructor() {
-    let ctx = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    let context = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
 
-    for (let name in ctx) {
-      let value = ctx[name];
+    for (let name in context) {
+      let value = context[name];
 
       (0, _defineProperty2.default)(this, name, {
         get: () => value,

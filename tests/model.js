@@ -4,37 +4,37 @@ const {createModel} = require('../dist/model');
 const {ValidationError} = require('../dist/errors');
 
 test('should allow static properties', (t) => {
-  let ctx = {major: 1};
+  let context = {major: 1};
 
   let userSchema = new Schema({
     classVirtuals: {
       version: {
-        get() {return `v${this.$ctx.major}.0.0`}
+        get() {return `v${this.$context.major}.0.0`}
       }
     }
   });
-  let User = createModel(userSchema, ctx);
+  let User = createModel(userSchema, context);
 
-  t.deepEqual(User.$ctx, ctx);
+  t.deepEqual(User.$context, context);
   t.is(User.version, 'v1.0.0');
   t.deepEqual(Object.keys(User), ['version']);
 });
 
 test('should allow static methods', (t) => {
-  let ctx = {id: '100'};
+  let context = {id: '100'};
 
   let userSchema = new Schema({
     classMethods: {
-      ping() {return `Hey #${this.$ctx.id}`}
+      ping() {return `Hey #${this.$context.id}`}
     },
   });
-  let User = createModel(userSchema, ctx);
+  let User = createModel(userSchema, context);
 
   t.is(User.ping(), 'Hey #100');
 });
 
 test('should allow instance properties', (t) => {
-  let ctx = {id: '100'};
+  let context = {id: '100'};
 
   let userSchema = new Schema({
     fields: {
@@ -44,11 +44,11 @@ test('should allow instance properties', (t) => {
     },
     instanceVirtuals: {
       nickname: {
-        get() {return `${this.name}-${this.$ctx.id}`}
+        get() {return `${this.name}-${this.$context.id}`}
       }
     }
   });
-  let User = createModel(userSchema, ctx);
+  let User = createModel(userSchema, context);
   let user = new User({name: 'John'});
 
   t.is(user.name, 'John');
@@ -57,14 +57,14 @@ test('should allow instance properties', (t) => {
 });
 
 test('should allow instance methods', (t) => {
-  let ctx = {now: 100};
+  let context = {now: 100};
 
   let userSchema = new Schema({
     instanceMethods: {
-      getTime() {return this.$ctx.now + 10}
+      getTime() {return this.$context.now + 10}
     }
   });
-  let User = createModel(userSchema, ctx);
+  let User = createModel(userSchema, context);
   let user = new User();
 
   t.is(user.getTime(), 110);

@@ -2,40 +2,40 @@ const test = require('ava');
 const {Context, Schema} = require('../dist');
 
 test('should define initial properties', (t) => {
-  let ctx = new Context({version: 3});
+  let context = new Context({version: 3});
 
-  t.is(ctx.version, 3);
-  t.deepEqual(Object.keys(ctx), ['version']);
+  t.is(context.version, 3);
+  t.deepEqual(Object.keys(context), ['version']);
 });
 
 test('method `defineModel` should initialize a new model', (t) => {
-  let ctx = new Context();
+  let context = new Context();
 
   let userSchema = new Schema();
-  let User = ctx.defineModel('User', userSchema);
+  let User = context.defineModel('User', userSchema);
   let user = new User();
 
-  t.is(User.$ctx, ctx);
-  t.is(user.$ctx, ctx);
+  t.is(User.$context, context);
+  t.is(user.$context, context);
 });
 
 test('method `getModel` should return a model', (t) => {
-  let ctx = new Context();
+  let context = new Context();
 
   let userSchema = new Schema();
-  let User0 = ctx.defineModel('User', userSchema);
-  let User1 = ctx.getModel('User');
+  let User0 = context.defineModel('User', userSchema);
+  let User1 = context.getModel('User');
 
   t.is(User0, User1);
 });
 
 test('method `deleteModel` should destroy a model', (t) => {
-  let ctx = new Context();
+  let context = new Context();
 
   let userSchema = new Schema();
-  let User0 = ctx.defineModel('User', userSchema);
-  ctx.deleteModel('User');
-  let User1 = ctx.getModel('User');
+  let User0 = context.defineModel('User', userSchema);
+  context.deleteModel('User');
+  let User1 = context.getModel('User');
 
   t.is(User1, undefined);
 });

@@ -10,10 +10,10 @@ export class Context {
   * Class constructor.
   */
 
-  constructor (ctx={}) {
+  constructor (context={}) {
 
-    for (let name in ctx) {
-      let value = ctx[name];
+    for (let name in context) {
+      let value = context[name];
 
       Object.defineProperty(this, name, {
         get: () => value,

@@ -13,7 +13,7 @@ import {ValidationError} from './errors';
 * Creates a Model class with context.
 */
 
-export function createModel (schema, ctx=null) {
+export function createModel (schema, context=null) {
   let {classMethods, classVirtuals, instanceMethods, instanceVirtuals} = schema;
 
   /*
@@ -38,8 +38,8 @@ export function createModel (schema, ctx=null) {
         value: this._createHandler()
       });
 
-      Object.defineProperty(this, '$ctx', {
-        value: ctx
+      Object.defineProperty(this, '$context', {
+        value: context
       });
 
       for (let name in instanceMethods) {
@@ -192,8 +192,8 @@ export function createModel (schema, ctx=null) {
   * Module static properties.
   */
 
-  Object.defineProperty(Model, '$ctx', {
-    value: ctx
+  Object.defineProperty(Model, '$context', {
+    value: context
   });
 
   Object.defineProperty(Model, '$schema', {

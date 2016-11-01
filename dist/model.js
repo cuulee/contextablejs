@@ -39,7 +39,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 */
 
 function createModel(schema) {
-  let ctx = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  let context = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
   let classMethods = schema.classMethods,
       classVirtuals = schema.classVirtuals,
       instanceMethods = schema.instanceMethods,
@@ -73,8 +73,8 @@ function createModel(schema) {
         value: this._createHandler()
       });
 
-      Object.defineProperty(this, '$ctx', {
-        value: ctx
+      Object.defineProperty(this, '$context', {
+        value: context
       });
 
       for (let name in instanceMethods) {
@@ -242,8 +242,8 @@ function createModel(schema) {
   * Module static properties.
   */
 
-  Object.defineProperty(Model, '$ctx', {
-    value: ctx
+  Object.defineProperty(Model, '$context', {
+    value: context
   });
 
   Object.defineProperty(Model, '$schema', {

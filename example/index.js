@@ -3,8 +3,8 @@ import {ApplicationContext} from './context';
 (async function () {
 
   // initializing and starting application context
-  let ctx = new ApplicationContext();
-  await ctx.start();
+  let context = new ApplicationContext();
+  await context.start();
 
   // initializing data object
   let userData = {
@@ -13,7 +13,7 @@ import {ApplicationContext} from './context';
   };
 
   // creating a new user
-  let User = ctx.getModel('User');
+  let User = context.getModel('User');
   let user = await User.create(userData);
 
   // updating user's email field
