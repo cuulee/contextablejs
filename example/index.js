@@ -13,7 +13,7 @@ import {ApplicationContext} from './context';
   };
 
   // creating a new user
-  let User = context.getModel('User');
+  let {User} = context;
   let user = await User.create(userData);
 
   // updating user's email field
