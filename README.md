@@ -429,12 +429,11 @@ catch(e) {
 > The same as method `validate()` but it throws the `ValidationError` when not all fields are valid.
 
 ```js
-let error = null;
 try {
-  user.approve();
+  user.approve(); // throws a ValidationError if not all fields are valid
 }
-catch (e) {
-  error = user.handle(e);
+catch (err) {
+  error = user.handle(err); // creates and returns a ValidationError from `err` or throws the `err` if it can't be handled
 }
 ```
 
@@ -479,12 +478,11 @@ catch (e) {
 | error | Error | Yes | - | Instance of an Error object.
 
 ```js
-let error = null;
 try {
-  user.approve();
+  user.approve(); // throws a ValidationError if not all fields are valid
 }
-catch (e) {
-  error = user.handle(e);
+catch (err) {
+  error = user.handle(err); // creates and returns a ValidationError from `err` or throws the `err` if it can't be handled
 }
 ```
 
