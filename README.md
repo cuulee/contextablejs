@@ -742,9 +742,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
-
-## TO-DO
-
-* reference to parent schema in validator
-* track changes (dirty, pristine, previous)
-* validate by field state (dirty, pristine)
