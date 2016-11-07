@@ -4,7 +4,7 @@
 
 > Simple, unopinionated and minimalist framework for creating context objects with support for unopinionated ORM, object schemas, type casting, validation and error handling.
 
-This is a light weight open source package for use on **server or in browser**. The source code is available on [GitHub](https://github.com/xpepermint/contextablejs) where you can also find our [issue tracker](https://github.com/xpepermint/contextablejs/issues).
+This is a light weight open source package. It has a reach API which significantly simplifies server-side and client-side data validation and manipulation. The source code is available on [GitHub](https://github.com/xpepermint/contextablejs) where you can also find our [issue tracker](https://github.com/xpepermint/contextablejs/issues).
 
 <img src="giphy.gif" width="300" />
 
@@ -24,7 +24,7 @@ This is a light weight open source package for use on **server or in browser**. 
 
 ## Related Projects
 
-* [vue-contextable.js](https://github.com/xpepermint/vue-contextable): [Contextable.js](https://github.com/xpepermint/contextablejs/) plugin for [Vue.js](https://vuejs.org/) v2.
+* [vue-contextable.js](https://github.com/xpepermint/vue-contextable): Contextable.js plugin for [Vue.js](https://vuejs.org/) v2.
 * [objectSchema.js](https://github.com/xpepermint/objectschemajs): Advanced schema enforced JavaScript objects.
 * [validatable.js](https://github.com/xpepermint/validatablejs): A library for synchronous and asynchronous validation.
 * [handleable.js](https://github.com/xpepermint/handleablejs): A library for synchronous and asynchronous error handling.
