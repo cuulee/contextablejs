@@ -1,4 +1,13 @@
+import {ObjectId} from 'mongodb';
 import {Schema} from '../../dist';
+
+/*
+* Typeable.js options.
+*/
+
+export const typeOptions = {
+  ObjectId (value) { return ObjectId(value) } // custom type ObjectId
+};
 
 /*
 * Model's fields.
@@ -6,33 +15,37 @@ import {Schema} from '../../dist';
 
 export const fields = {
   _id: {
-    type: 'BSONObjectId'
+    type: 'ObjectId'
   },
   name: {
     type: 'String',
-    validate: {
-      presence: {
+    validate: [
+      {
+        validator: 'presence',
         message: 'is required'
       }
-    }
+    ]
   },
   email: {
     type: 'String',
-    validate: {
-      presence: {
+    validate: [
+      {
+        validator: 'presence',
         message: 'is required'
       },
-      stringEmail: {
+      {
+        validator: 'stringEmail',
         message: 'is not an email'
       }
-    },
-    handle: {
-      mongoUniqueness: {
+    ],
+    handle: [
+      {
+        handler: 'mongoUniqueness',
         message: 'is already taken',
         indexName: 'uniqueEmail'
       }
-    }
-  },
+    ]
+  }
 };
 
 /*
@@ -46,12 +59,15 @@ export const classMethods = {
   */
 
   async create (input={}) {
+    let collection = this.$context.mongo.collection('users');
+
     let model = new this(input);
     try {
-      await model.approve();
-      await this.$context.mongo.collection('users').insertOne(model);
-    } catch(e) {
-      throw await model.handle(e);
+      await model.validate();
+      await collection.insertOne(model);
+    }
+    catch (e) {
+      await model.handle(e);
     }
     return model;
   }
@@ -69,13 +85,17 @@ export const instanceMethods = {
   */
 
   async save () {
+    let collection = this.$context.mongo.collection('users');
+
     try {
-      await this.approve();
-      await this.$context.mongo.collection('users').updateOne({_id: this._id}, this, {upsert: true});
-    } catch(e) {
-      throw await this.handle(e);
+      await this.validate();
+      await collection.updateOne({_id: this._id}, this, {upsert: true});
     }
-    return this;
+    catch (e) {
+      await this.handle(e);
+      return false;
+    }
+    return true;
   }
 };
 
@@ -84,6 +104,7 @@ export const instanceMethods = {
 */
 
 export const schema = new Schema({
+  typeOptions,
   fields,
   classMethods,
   instanceMethods

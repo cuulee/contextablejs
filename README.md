@@ -15,11 +15,11 @@ This is a light weight open source package for use on **server or in browser**. 
 * Type casting
 * Custom data types
 * Field default value
-* Field value transformation with custom getter and setter
+* Field value transformation with getter and setter
 * Strict and relaxed schemas
-* Nesting with support for self referencing
-* Field change tracking, data commit and rollback
-* Field validation
+* Document nesting with support for self referencing
+* Change tracking, data commits and rollbacks
+* Advanced field validation
 * Enhanced error handling
 
 ## Related Projects
@@ -108,27 +108,30 @@ let userSchema = new Schema({
   fields: {
     firstName: {
       ...
-      validate: {
-        presence: {
-          message: 'is required'
+      validate: [
+        {
+          validator: 'presence',  // validator name
+          message: 'is required' // validator error message
         }
-      }
+      ]
     },
     lastName: {
       ...
-      validate: {
-        presence: {
-          message: 'is required'
+      validate: [
+        {
+          validator: 'presence',  // validator name
+          message: 'is required' // validator error message
         }
-      }
+      ]
     },
     tags: {
       ...
-      validate: {
-        presence: {
-          message: 'is required'
+      validate: [
+        {
+          validator: 'presence',  // validator name
+          message: 'is required' // validator error message
         }
-      }
+      ]
     }
   }
 });
@@ -179,12 +182,13 @@ let userSchema = new Schema({
   fields: {
     firstName: {
       ...
-      handlers: {
-        mongoUniqueness: {
-          message: 'already exists',
-          indexName: 'uniqueFirstName'
+      handle: [
+        {
+          handler: 'mongoUniqueness', // handler name
+          message: 'already taken', // handler error message
+          indexName: 'uniqueFirstName' // handler-specific property
         }
-      }
+      ]
     },
     ...
   }
@@ -219,16 +223,18 @@ let user = new User({
   tags: ['admin']
 });
 
-let error = null;
-let data = null;
 try {
-  await user.approve(); // throws a ValidationError when fields are invalid
-  data = await user.insert(); // saves input data to a database
+  await user.validate(); // throws a ValidationError when fields are invalid
+  await user.insert(); // our custom method which saves input data to a database
 }
-catch(e) {
-  error = await user.handle(e); // creates a ValidationError from field-related errors or throws the original
+catch (e) {
+  await user.handle(e); // handles the `e` or throws it if unhandled
 }
-// do something with data or error ...
+
+user.firstName; // -> John
+user.$firstName; // -> reference to a field class instance
+user.$firstName.errors; // -> an array of field-specific errors
+user.collectErrors(); // -> an array of all errors (including those deeply nested)
 ```
 
 ## API
@@ -250,7 +256,7 @@ A Schema can also be used as a custom type object. This way you can create a nes
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
 | fields | Object | Yes | - | An object with fields definition. You should pass a function which returns the definition object in case of self referencing.
-| strict | Boolean | No | true | A schema type (set to false to allow dynamic fields not defined in schema).
+| strict | Boolean | No | true | A schema type (set to false to allow dynamic fields not defined by schema).
 | validatorOptions | Object | No | validatable.js defaults | Configuration options for the Validator class, provided by the [validatable.js](https://github.com/xpepermint/validatablejs), which is used for field validation.
 | typeOptions | Object | No | typeable.js defaults | Configuration options for the cast method provided by the [typeable.js](https://github.com/xpepermint/typeablejs), which is used for data type casting.
 | handlerOptions | Object | No | handleable.js defaults | Configuration options for the Handler class, provided by the [handleable.js](https://github.com/xpepermint/handleablejs), which is used for field error handling.
@@ -264,18 +270,20 @@ export const fields = {
   email: { // a field name holding a field definition
     type: 'String', // a field data type provided by typeable.js
     defaultValue: 'John Smith', // a default field value
-    validate: { // field validations provided by validatable.js
-      presence: { // validator name
-        message: 'is required' // validator option
+    validate: [ // field validations provided by validatable.js
+      { // validator recipe
+        validator: 'presence',  // validator name
+        message: 'is required' // validator error message
       }
-    },
-    handle: { // error handling provided by handle
-      mongoUniqueness: { // handler name
-        message: 'is already taken', // handler option
-        indexName: 'uniqEmail' // handler option
+    ],
+    handle: [ // error handling provided by handle
+      { // handler recipe
+        handler: 'mongoUniqueness', // handler name
+        message: 'already taken', // handler error message
+        indexName: 'uniqEmail' // handler-specific property
       }
-    }
-  },
+    ]
+  }
 };
 
 export const strict = true; // schema mode
@@ -395,22 +403,18 @@ let Model = context.defineModel('Model', schema);
 A model provides a unified validation and error handling mechanism.
 
 ```js
-let error = null;
 try {
-  await model.approve(); // throw an error when invalid
+  await model.validate(); // throws a ValidationError when fields are invalid
 }
-catch(e) {
-  error = await model.handle(e); // creates a ValidationError from field-related errors or throws the original
+catch (e) {
+  await model.handle(e); // creates a ValidationError from handlers, updates the `user.$error` or throws
 }
+model.$error; // holds the last ValidationError instance
 ```
 
-**Model.$context**:Context
+**Model.$context**: Context
 
 > Related context instance.
-
-**Model.$schema**:Schema
-
-> Related schema instance.
 
 **Model.prototype.$context**:Context
 
@@ -420,48 +424,82 @@ catch(e) {
 
 > Handler instance, used for handling field-related errors.
 
-**Model.prototype.$parent**:Model
+**Model.prototype.$parent**: Model
 
 > Parent model instance.
 
-**Model.prototype.$schema**:Schema
+**Model.prototype.$root**: Model
 
-> Related schema instance.
+> The first model instance in a tree of models.
 
-**Model.prototype.$validator**:Validator
+**Model.prototype.$schema**: Schema
+
+> Schema instance.
+
+**Model.prototype.$validator**: Validator
 
 > Validator instance, used for validating fields.
 
-**Model.prototype.approve()**:Model
+**Model.prototype.applyErrors(errors)**: Model
 
-> The same as method `validate()` but it throws the `ValidationError` when not all fields are valid.
+> Deeply populates fields with the provided `errors`.
 
 ```js
-try {
-  user.approve(); // throws a ValidationError if not all fields are valid
-}
-catch (err) {
-  error = user.handle(err); // creates and returns a ValidationError from `err` or throws the `err` if it can't be handled
-}
+doc.applyErrors([
+  {
+    path: ['name'], // field path
+    errors: [
+      {
+        name: 'ValidatorError', // error class name (ValidatorError, HandlerError or Error)
+        validator: 'presence',  // validator name
+        message: 'is required' // validator message
+      }
+    ]
+  },
+  {
+    path: ['newBook', 'title'],
+    errors: [
+      {
+        name: 'HandlerError',
+        handler: 'fooHandler',
+        message: 'is not foo'
+      }
+    ]
+  },
+  {
+    path: ['newBooks', 1, 'title'],
+    errors: [
+      {
+        name: 'ValidatorError',
+        validator: 'presence',
+        message: 'is required'
+      }
+    ]
+  }
+]);
 ```
 
-**Model.prototype.clear()**:Model
+**Model.prototype.clear()**: Model
 
 > Sets all model fields to `null`.
 
-**Model.prototype.clone()**:Model
+**Model.prototype.clone()**: Model
 
 > Returns a new Model instance which is the exact copy of the original.
 
-**Model.prototype.commit()**:Model
+**Model.prototype.collectErrors()**: Array
+
+> Returns a list of errors for all the fields (e.g. [{path: ['name'], errors: [ValidatorError(), ...]}]).
+
+**Model.prototype.commit()**: Model
 
 > Sets initial value of each model field to the current value of a field. This is how field change tracking is restarted.
 
-**Model.prototype.equals(value)**:Boolean
+**Model.prototype.equals(value)**: Boolean
 
 > Returns `true` when the provided `value` represents an object with the same fields as the model itself.
 
-**Model.prototype.get(...keys)**:Field
+**Model.prototype.getPath(...keys)**: Field
 
 > Returns a class instance of the field at path.
 
@@ -469,7 +507,31 @@ catch (err) {
 |--------|------|----------|---------|------------
 | keys | Array | Yes | - | Path to a field (e.g. `['book', 0, 'title']`).
 
-**Model.prototype.has(...keys)**:Boolean
+**Model.prototype.handle(error, {quiet})**: Promise(Model)
+
+> If the error isn't an instance of ValidationError, then it tries to handle it against fields handlers. If the method is unable to handle the error, the error is thrown.
+
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| error | Error | Yes | - | Instance of an Error object.
+| quiet | Boolean | No | true | When set to true, a handled ValidationError is thrown. This doesn't affect the unhandled errors (they are always thrown).
+
+```js
+try {
+  await model.validate(); // throws a ValidationError when fields are invalid
+}
+catch (e) {
+  await model.handle(e); // handles `e` or throws it if unhandled
+}
+user.$email.errors; // -> an array of field-specific errors
+user.collectErrors(); // -> an array of all errors (including those deeply nested)
+```
+
+**Model.prototype.hasErrors()**: Boolean
+
+> Returns `true` when no errors exist (inverse of `isValid()`). Make sure that you call the `validate()` method first.
+
+**Model.prototype.hasPath(...keys)**: Boolean
 
 > Returns `true` when a field path exists.
 
@@ -477,32 +539,19 @@ catch (err) {
 |--------|------|----------|---------|------------
 | keys | Array | Yes | - | Path to a field (e.g. `['book', 0, 'title']`).
 
-**Model.prototype.handle(error)**:ValidationError
-
-> If the error isn't an instance of ValidationError, then it tries to create one by using fields handlers. If the method is unable to handle the error, it throws the original error.
-
-| Option | Type | Required | Default | Description
-|--------|------|----------|---------|------------
-| error | Error | Yes | - | Instance of an Error object.
-
-```js
-try {
-  user.approve(); // throws a ValidationError if not all fields are valid
-}
-catch (err) {
-  error = user.handle(err); // creates and returns a ValidationError from `err` or throws the `err` if it can't be handled
-}
-```
-
-**Model.prototype.isChanged()**:Boolean
+**Model.prototype.isChanged()**: Boolean
 
 > Returns `true` if at least one model field has been changed.
 
-**Model.prototype.isValid()**:Promise
+**Model.prototype.isValid()**: Boolean
 
-> Returns `true` when all model fields are valid.
+> Returns `true` when all model fields are valid (inverse of `hasErrors()`). Make sure that you call the `validate()` method first.
 
-**Model.prototype.populate(data)**:Model
+**Model.prototype.invalidate()**: Model
+
+> Clears `errors` on all fields (the reverse of `validate()`).
+
+**Model.prototype.populate(data)**: Model
 
 > Applies data to a model.
 
@@ -510,57 +559,41 @@ catch (err) {
 |--------|------|----------|---------|------------
 | data | Object | Yes | - | Data object.
 
-**Model.prototype.reset()**:Model
+**Model.prototype.reset()**: Model
 
 > Sets each model field to its default value.
 
-**Model.prototype.rollback()**:Model
+**Model.prototype.rollback()**: Model
 
 > Sets each model field to its initial value (last committed value). This is how you can discharge model changes.
 
-**Model.prototype.toObject()**:Object
+**Model.prototype.toObject()**: Object
 
 > Converts a model into serialized data object.
 
-**Model.prototype.validate()**:Promise(Object)
+**Model.prototype.validate({quiet})**: Promise(Model)
 
-> Validates all model fields and returns errors.
+> Validates model fields and throws a ValidationError error if not all fields are valid unless the `quiet` is set to `true`.
+
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| quiet | Boolean | No | false | When set to `true`, a ValidationError is thrown.
 
 ```js
-{ // return value example
-  name: { // field value is missing
-    messages: [{validator: 'presence', message: 'is required'}]
-  },
-  book: { // nested object is missing
-    messages: [{validator: 'presence', message: 'is required'}]
-  },
-  address: {
-    messages: [],
-    related: { // nested object errors
-      post: {
-        messages: [{validator: 'presence', message: 'is required'}]
-      }
-    }
-  },
-  friends: { // an array of nested objects has errors
-    messages: [],
-    related: [
-      undefined, // the first item was valid
-      { // the second item has errors
-        name: {
-          messages: [{validator: 'presence', message: 'is required'}]
-        }
-      }
-    ]
-  }
+try {
+  await doc.validate(); // throws a ValidationError when fields are invalid
+}
+catch (e) {
+  // `e` is an instance of ValidationError, which holds errors for all invalid fields (including those deeply nested)
 }
 ```
 
 ### Field
 
-When a field is defined on a model, another field with the same name but prefixed with the `$` is set. This special read-only field holds a reference to the actual field's class instance.
+When a field is defined on a model, another field with the same name but prefixed with the `$` is set (e.g. `$name` for field `name`). This special read-only field holds a reference to the actual field's class instance.
 
 ```js
+
 let User = context.getModel('user');
 let user = new User();
 
@@ -569,126 +602,118 @@ user.$name; // -> reference to model field instance
 user.$name.isChanged(); // -> calling field instance method
 ```
 
-**Field(document, name)**
+**Field(owner, name)**
 
-> Class which handles each model field.
+> A field class which represents each field on a model.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
-| document | Model | Yes | - | Instance of a model.
+| owner | Model | Yes | - | An instance of a Model which owns the field.
 | name | String | Yes | - | Field name (the same name as used in schema).
 
-**Field.prototype.$document**:Model
+**Field.prototype.$owner**: Model
 
-> Model instance.
+> A reference to a Model instance on which the field is defined.
 
-**Field.prototype.$name**:String
+**Field.prototype.name**: String
 
 > Field name.
 
-**Field.prototype.clear()**:Field
+**Field.prototype.clear()**: Field
 
 > Sets field and related sub fields to `null`.
 
-**Field.prototype.commit()**:Field
+**Field.prototype.commit()**: Field
 
 > Sets initial value to the current value. This is how field change tracking is restarted.
 
-**Field.prototype.defaultValue**:Any
+**Field.prototype.defaultValue**: Any
 
 > A getter which returns the default field value.
 
-**Field.prototype.equals(value)**:Boolean
+**Field.prototype.equals(value)**: Boolean
 
 > Returns `true` when the provided `value` represents an object that looks the same.
 
-**Field.prototype.initialValue**:Any
+**Field.prototype.handle(error)**: Promise(Field)
 
-> A getter which returns the initial field value (a value from the last commit).
+> Handles the `error` and populates the `errors` property with errors.
 
-**Field.prototype.isChanged()**:Boolean
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| error | Error | Yes | - | Error object to be handled.
+
+**Field.prototype.hasErrors()**: Boolean
+
+> Returns `true` when no errors exist (inverse of `isValid()`). Make sure that you call the `validate()` method first.
+
+**Field.prototype.initialValue**: Any
+
+> A getter which returns the initial field value (last committed value).
+
+**Field.prototype.isChanged()**: Boolean
 
 > Returns `true` if the field or at least one sub field have been changed.
 
-**Field.prototype.isValid()**:Promise(Boolean)
+**Field.prototype.isValid()**: Boolean
 
-> Returns `true` if the field and all sub fields are valid.
+> Returns `true` if the field and all sub fields are valid (inverse of `hasErrors()`). Make sure that you call the `validate()` method first.
 
-**Field.prototype.reset()**:Field
+**Field.prototype.invalidate()**: Field
+
+> Clears the `errors` field on all fields (the reverse of `validate()`).
+
+**Field.prototype.reset()**: Field
 
 > Sets the field to its default value.
 
-**Field.prototype.rollback()**:Field
+**Field.prototype.rollback()**: Field
 
 > Sets the field to its initial value (last committed value). This is how you can discharge field's changes.
 
-**Field.prototype.validate()**:Promise(Object)
+**Field.prototype.validate()**: Promise(Field)
 
-> Validates the field and returns errors.
+> Validates the `value` and populates the `errors` property with errors.
 
-**Field.prototype.value**:Any
+**Field.prototype.value**: Any
 
 > A getter and setter for the value of the field.
 
 ### ValidationError
 
-Validation error is thrown by some methods which validate fields (e.g. `Model.prototype.approve`).
+**ValidationError(message, code)**
 
-**ValidationError(data, message)**
-
-> An error class which holds the validation errors.
+> A validation error class which is triggered by method `validate` when not all fields are valid.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
-| data | Model | Yes | - | Validation object (an object which is returned by the `Model.prototype.validate`).
-| message | String | No | Some fields are not valid. | Error message.
-| code | Number | No | 422 | Error code number.
+| paths | String[][] | No | [] | A list of all invalid document paths (e.g. [['friends', 1, 'name'], ...])
+| message | String | No | Validation failed | General error message.
+| code | Number | No | 422 | Error code.
 
-```js
-import {ValidationError} from 'contextable';
+### ValidatorError
 
-new ValidationError({
-  name: {
-    errors: [
-      {validator: 'presence', message: 'is required'}
-    ]
-  },
-  friend: {
-    errors: [],
-    related: {
-      name: {
-        errors: [
-          {validator: 'presence', message: 'is required'}
-        ]
-      }
-    }
-  }
-});
-```
+**ValidatorError(validator, message, code)**
 
-**ValidationError.prototype.get(...keys)**:Object
-
-> Returns errors for the specified path.
+> A validator error class, provided by the `validatable.js`, which holds information about the validators which do not approve a value that has just been validated.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
-| keys | Array | Yes | - | Path to a field (e.g. `['book', 0, 'title']`).
+| validator | String | Yes | - | Validator name.
+| message | String | No | null | Validation error message.
+| code | Integer | No | 422 | Error status code.
 
-**ValidationError.prototype.has(...keys)**:Boolean
+### HandlerError
 
-> Returns errors for the specified path.
+**HandlerError(handler, message, code)**
+
+> Handled error class which holds information about the handled error.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
-| keys | Array | Yes | - | Path to a field (e.g. `['book', 0, 'title']`).
-
-**ValidationError.prototype.toArray()**:Array
-
-> Returns error data as an array.
-
-**ValidationError.prototype.toObject()**:Object
-
-> Returns error data as an object.
+| handler | String | Yes | - | Handler name.
+| message | String | No | null | Handler error message.
+| code | Integer | No | 422 | Error status code.
 
 ## Example
 

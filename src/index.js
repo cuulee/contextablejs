@@ -1,9 +1,19 @@
-import {Schema} from './schema';
-import {Context} from './context';
-import {GeneralError, ValidationError} from './errors';
+import {Schema} from './schemas';
+import {Context} from './contexts';
+import {
+  ValidationError,
+  ValidatorError,
+  HandlerError
+} from './errors';
 
 /*
 * Exposing public classes.
 */
 
-export {Schema, Context, GeneralError, ValidationError};
+export {
+  Schema,
+  Context,
+  ValidationError,
+  ValidatorError,
+  HandlerError
+};

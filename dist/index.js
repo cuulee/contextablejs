@@ -3,11 +3,11 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.ValidationError = exports.GeneralError = exports.Context = exports.Schema = undefined;
+exports.HandlerError = exports.ValidatorError = exports.ValidationError = exports.Context = exports.Schema = undefined;
 
-var _schema = require('./schema');
+var _schemas = require('./schemas');
 
-var _context = require('./context');
+var _contexts = require('./contexts');
 
 var _errors = require('./errors');
 
@@ -15,7 +15,8 @@ var _errors = require('./errors');
 * Exposing public classes.
 */
 
-exports.Schema = _schema.Schema;
-exports.Context = _context.Context;
-exports.GeneralError = _errors.GeneralError;
+exports.Schema = _schemas.Schema;
+exports.Context = _contexts.Context;
 exports.ValidationError = _errors.ValidationError;
+exports.ValidatorError = _errors.ValidatorError;
+exports.HandlerError = _errors.HandlerError;

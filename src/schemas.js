@@ -1,18 +1,10 @@
-import * as schema from 'objectschema/dist/schema';
+import * as objectschema from 'objectschema/dist';
 
 /*
-* Validator default options.
+* A class for defining module structure.
 */
 
-export const handlerDefaults = {
-  errorBuilder: (handler, error, value, {message}) => ({handler, message})
-};
-
-/*
-* A class for defining Model structure and properties.
-*/
-
-export class Schema extends schema.Schema {
+export class Schema extends objectschema.Schema {
 
   /*
   * Class constructor.
@@ -22,7 +14,7 @@ export class Schema extends schema.Schema {
     super({fields, strict, validatorOptions, typeOptions});
 
     Object.defineProperty(this, 'handlerOptions', { // handleable.js configuration options
-      value: Object.assign({}, handlerDefaults, handlerOptions)
+      value: handlerOptions
     });
     Object.defineProperty(this, 'classMethods', { // model class methods
       value: classMethods

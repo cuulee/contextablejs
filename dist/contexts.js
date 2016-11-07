@@ -13,7 +13,7 @@ var _defineProperty = require('babel-runtime/core-js/object/define-property');
 
 var _defineProperty2 = _interopRequireDefault(_defineProperty);
 
-var _model = require('./model');
+var _models = require('./models');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -55,7 +55,7 @@ class Context {
   defineModel(name, schema) {
     let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-    let model = (0, _model.createModel)(schema, this);
+    let model = (0, _models.createModel)(schema, this);
 
     let descriptor = (0, _assign2.default)({
       enumerable: true

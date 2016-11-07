@@ -1,5 +1,8 @@
-const test = require('ava');
-const {Context, Schema} = require('../dist');
+import test from 'ava';
+import {
+  Context,
+  Schema
+} from '../dist';
 
 test('should define initial properties', (t) => {
   let context = new Context({version: 3});

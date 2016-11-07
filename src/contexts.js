@@ -1,4 +1,4 @@
-import {createModel} from './model';
+import {createModel} from './models';
 
 /*
 * The core class for creating context.
@@ -10,7 +10,7 @@ export class Context {
   * Class constructor.
   */
 
-  constructor (context={}) {
+  constructor (context = {}) {
     for (let name in context) {
       this.defineProperty(name, {
         get: () => context[name],
@@ -33,7 +33,7 @@ export class Context {
   * Creates a new Model class and stores it on the context.
   */
 
-  defineModel (name, schema, options={}) {
+  defineModel (name, schema, options = {}) {
     let model = createModel(schema, this);
 
     let descriptor = Object.assign({

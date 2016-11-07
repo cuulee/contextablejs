@@ -14,22 +14,28 @@ import {ApplicationContext} from './context';
 
   // creating a new user
   let {User} = context;
-  let user = await User.create(userData);
+  let user = null;
+  try {
+    user = await User.create(userData);
+  }
+  catch (error) {
+    return console.error(error);
+  }
 
   // updating user's email field
   user.email = 'john.smith@google.com';
-  await user.save();
+  try {
+    await user.save();
+  }
+  catch (error) {
+    return console.error(error);
+  }
 
   // displaying user
-  console.log(
-    JSON.stringify(user, null, 2)
-  );
+  if (!user.isValid()) {
+    console.log('Mongo Error:', user.collectErrors()[0].errors.map((e) => e.toObject()));
+  }
 
-})().catch((error) => {
+  console.log('User Object:', JSON.stringify(user, null, 2));
 
-  // displaying error
-  console.error(
-    JSON.stringify(error, null, 2)
-  );
-
-});
+})().catch(console.error);
