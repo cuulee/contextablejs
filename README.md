@@ -24,10 +24,11 @@ This is a light weight open source package for use on **server or in browser**. 
 
 ## Related Projects
 
-* [ObjectSchema.js](https://github.com/xpepermint/objectschemajs): Advanced schema enforced JavaScript objects.
-* [Validatable.js](https://github.com/xpepermint/validatablejs): A library for synchronous and asynchronous validation.
-* [Handleable.js](https://github.com/xpepermint/handleablejs): A library for synchronous and asynchronous error handling.
-* [Typeable.js](https://github.com/xpepermint/typeablejs): A library for checking and casting types.
+* [vue-contextable.js](https://github.com/xpepermint/vue-contextable): [Contextable.js](https://github.com/xpepermint/contextablejs/) plugin for [Vue.js](https://vuejs.org/) v2.
+* [objectSchema.js](https://github.com/xpepermint/objectschemajs): Advanced schema enforced JavaScript objects.
+* [validatable.js](https://github.com/xpepermint/validatablejs): A library for synchronous and asynchronous validation.
+* [handleable.js](https://github.com/xpepermint/handleablejs): A library for synchronous and asynchronous error handling.
+* [typeable.js](https://github.com/xpepermint/typeablejs): A library for checking and casting types.
 
 ## Motivation
 
@@ -239,7 +240,7 @@ user.collectErrors(); // -> an array of all errors (including those deeply neste
 
 ## API
 
-*Contextable.js* is built on top of [ObjectSchema.js](https://github.com/xpepermint/objectschemajs) which uses [Typeable.js](https://github.com/xpepermint/typeablejs) for type casting, [Validatable.js](https://github.com/xpepermint/validatablejs) for fields validation and [Handleable.js](https://github.com/xpepermint/handleablejs) for handling field-related errors.
+*Contextable.js* is built on top of [objectSchema.js](https://github.com/xpepermint/objectschemajs) which uses [typeable.js](https://github.com/xpepermint/typeablejs) for type casting, [validatable.js](https://github.com/xpepermint/validatablejs) for fields validation and [handleable.js](https://github.com/xpepermint/handleablejs) for handling field-related errors.
 
 It provides two core classes. The `Schema` class represents a configuration object for defining context-aware models and the `Context` represents the application context and an unopinionated ORM framework.
 
@@ -329,13 +330,13 @@ export const schema = new Schema({
 });
 ```
 
-This package uses [Typeable.js](https://github.com/xpepermint/typeablejs) for data type casting. Many common data types and array types are supported but we can also define custom types or override existing types through a `typeOptions` key. Please check package's website for a list of supported types and further information.
+This package uses [typeable.js](https://github.com/xpepermint/typeablejs) for data type casting. Many common data types and array types are supported but we can also define custom types or override existing types through a `typeOptions` key. Please check package's website for a list of supported types and further information.
 
 By default, all fields in a schema are set to `null`. We can set a default value for a field by setting the `defaultValue` option.
 
-Field validation is handled by the [Validatable.js](https://github.com/xpepermint/validatablejs) package. We can configure the validator by passing the `validatorOptions` option to our schema which will be passed directly to the `Validator` class. The package provides many built-in validators, allows adding custom validators and overriding existing ones. When a document is created all validator methods share document's context thus we can write context-aware checks. Please check package's website for details.
+Field validation is handled by the [validatable.js](https://github.com/xpepermint/validatablejs) package. We can configure the validator by passing the `validatorOptions` option to our schema which will be passed directly to the `Validator` class. The package provides many built-in validators, allows adding custom validators and overriding existing ones. When a document is created all validator methods share document's context thus we can write context-aware checks. Please check package's website for details.
 
-*Contextable.js* has a unique concept of handling field-related errors. It uses the [Handleable.js](https://github.com/xpepermint/handleablejs) under the hood. We can configure the handler by passing the `handlerOptions` key to our schema which will be passed directly to the `Handler` class. The package already provides some built-in handlers, it allows adding custom handlers and overriding existing ones. When a document is created all handlers share document's context thus we can write context-aware checks. Please check package's website for further information.
+*Contextable.js* has a unique concept of handling field-related errors. It uses the [handleable.js](https://github.com/xpepermint/handleablejs) under the hood. We can configure the handler by passing the `handlerOptions` key to our schema which will be passed directly to the `Handler` class. The package already provides some built-in handlers, it allows adding custom handlers and overriding existing ones. When a document is created all handlers share document's context thus we can write context-aware checks. Please check package's website for further information.
 
 Schema also holds information about model's class methods, instance methods, class virtual fields and instance virtual fields. You can define synchronous or asynchronous, class and instance methods. All model properties are context-aware and you can access the context through the `this.$context` getter.
 
@@ -394,7 +395,7 @@ context.defineProperty('memorize', {
 
 ### Model
 
-A model is unopinionated, context-aware and schema enforced data object. It represents a class, which is dynamically built from a schema. A model is an upgraded [Document](https://github.com/xpepermint/objectschemajs#document) class, provided by the underlying [ObjectSchema.js](https://github.com/xpepermint/objectschemajs) package, with custom class methods, enumerable class properties, instance methods and enumerable instance properties.
+A model is unopinionated, context-aware and schema enforced data object. It represents a class, which is dynamically built from a schema. A model is an upgraded [Document](https://github.com/xpepermint/objectschemajs#document) class, provided by the underlying [objectSchema.js](https://github.com/xpepermint/objectschemajs) package, with custom class methods, enumerable class properties, instance methods and enumerable instance properties.
 
 ```js
 let Model = context.defineModel('Model', schema);
