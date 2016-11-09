@@ -9,6 +9,8 @@ var _dist = require('objectschema/dist');
 
 var objectschema = _interopRequireWildcard(_dist);
 
+var _utils = require('objectschema/dist/utils');
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 /*
@@ -23,8 +25,10 @@ class Schema extends objectschema.Schema {
 
   constructor() {
     var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref$fields = _ref.fields;
+        _ref$mixins = _ref.mixins;
 
+    let mixins = _ref$mixins === undefined ? [] : _ref$mixins;
+    var _ref$fields = _ref.fields;
     let fields = _ref$fields === undefined ? {} : _ref$fields;
     var _ref$strict = _ref.strict;
     let strict = _ref$strict === undefined ? true : _ref$strict;
@@ -43,22 +47,31 @@ class Schema extends objectschema.Schema {
     var _ref$instanceVirtuals = _ref.instanceVirtuals;
     let instanceVirtuals = _ref$instanceVirtuals === undefined ? {} : _ref$instanceVirtuals;
 
-    super({ fields, strict, validatorOptions, typeOptions });
+    super({ mixins, fields, strict, validatorOptions, typeOptions });
 
     Object.defineProperty(this, 'handlerOptions', { // handleable.js configuration options
-      value: handlerOptions
+      get: () => (0, _utils.merge)(...mixins.map(v => v.handlerOptions), handlerOptions),
+      enumerable: true // required for deep nesting
     });
+
     Object.defineProperty(this, 'classMethods', { // model class methods
-      value: classMethods
+      get: () => (0, _utils.merge)(...mixins.map(v => v.classMethods), classMethods),
+      enumerable: true // required for deep nesting
     });
+
     Object.defineProperty(this, 'classVirtuals', { // model class virtual fields
-      value: classVirtuals
+      get: () => (0, _utils.merge)(...mixins.map(v => v.classVirtuals), classVirtuals),
+      enumerable: true // required for deep nesting
     });
+
     Object.defineProperty(this, 'instanceMethods', { // model instance methods
-      value: instanceMethods
+      get: () => (0, _utils.merge)(...mixins.map(v => v.instanceMethods), instanceMethods),
+      enumerable: true // required for deep nesting
     });
+
     Object.defineProperty(this, 'instanceVirtuals', { // model instance virtual fields
-      value: instanceVirtuals
+      get: () => (0, _utils.merge)(...mixins.map(v => v.instanceVirtuals), instanceVirtuals),
+      enumerable: true // required for deep nesting
     });
   }
 

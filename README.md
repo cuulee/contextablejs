@@ -15,9 +15,11 @@ This is a light weight open source package. It has a reach API which significant
 * Type casting
 * Custom data types
 * Field default value
+* Field fake value
 * Field value transformation with getter and setter
 * Strict and relaxed schemas
-* Document nesting with support for self referencing
+* Schema mixins for extending schemas
+* Model nesting with support for self referencing
 * Change tracking, data commits and rollbacks
 * Advanced field validation
 * Enhanced error handling
@@ -94,7 +96,8 @@ let userSchema = new Schema({
       type: 'String'
     },
     tags: [
-      type: ['String']
+      type: ['String'],
+      defaultValue: ['user']
     ]
   }
 });
@@ -250,12 +253,13 @@ Schema represents a configuration object from which a `Model` can be created. It
 
 A Schema can also be used as a custom type object. This way you can create a nested data structure by setting a schema instance for a field `type`. When a model is created, each schema in a tree of fields will become an instance of a Model - thus we get a tree of models.
 
-**new Schema({fields, strict, validatorOptions, typeOptions, handlerOptions, classMethods, classVirtuals, instanceMethods, instanceVirtuals)**
+**new Schema({mixins, fields, strict, validatorOptions, typeOptions, handlerOptions, classMethods, classVirtuals, instanceMethods, instanceVirtuals)**
 
 > A class for defining model structure.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
+| mixins | [] | No | [] | A list of schema instances from which to extend the schema.
 | fields | Object | Yes | - | An object with fields definition. You should pass a function which returns the definition object in case of self referencing.
 | strict | Boolean | No | true | A schema type (set to false to allow dynamic fields not defined by schema).
 | validatorOptions | Object | No | validatable.js defaults | Configuration options for the Validator class, provided by the [validatable.js](https://github.com/xpepermint/validatablejs), which is used for field validation.
@@ -268,9 +272,11 @@ A Schema can also be used as a custom type object. This way you can create a nes
 
 ```js
 export const fields = {
+  mixins: [animalSchema, catSchema], // schema extensions
   email: { // a field name holding a field definition
     type: 'String', // a field data type provided by typeable.js
-    defaultValue: 'John Smith', // a default field value
+    defaultValue: 'John Smith', // a default field value (can be a value of a function)
+    fakeValue: 'John Smith', // a fake field value (can be a value of a function)
     validate: [ // field validations provided by validatable.js
       { // validator recipe
         validator: 'presence',  // validator name
@@ -500,6 +506,10 @@ doc.applyErrors([
 
 > Returns `true` when the provided `value` represents an object with the same fields as the model itself.
 
+**Model.prototype.fake()**: Model
+
+> Sets each model field to its fake value if a fake value generator is registered, otherwise the default value is used.
+
 **Model.prototype.getPath(...keys)**: Field
 
 > Returns a class instance of the field at path.
@@ -598,9 +608,9 @@ When a field is defined on a model, another field with the same name but prefixe
 let User = context.getModel('user');
 let user = new User();
 
-user.name = 'John'; // -> actual model field
-user.$name; // -> reference to model field instance
-user.$name.isChanged(); // -> calling field instance method
+user.name = 'John'; // actual model field
+user.$name; // reference to model field instance
+user.$name.isChanged(); // calling field instance method
 ```
 
 **Field(owner, name)**
@@ -615,10 +625,6 @@ user.$name.isChanged(); // -> calling field instance method
 **Field.prototype.$owner**: Model
 
 > A reference to a Model instance on which the field is defined.
-
-**Field.prototype.name**: String
-
-> Field name.
 
 **Field.prototype.clear()**: Field
 
@@ -635,6 +641,14 @@ user.$name.isChanged(); // -> calling field instance method
 **Field.prototype.equals(value)**: Boolean
 
 > Returns `true` when the provided `value` represents an object that looks the same.
+
+**Field.prototype.fake()**: Field
+
+> Sets field to a generated fake value.
+
+**Field.prototype.fakeValue**: Any
+
+> A getter which returns a fake field value.
 
 **Field.prototype.handle(error)**: Promise(Field)
 
@@ -664,6 +678,10 @@ user.$name.isChanged(); // -> calling field instance method
 
 > Clears the `errors` field on all fields (the reverse of `validate()`).
 
+**Field.prototype.name**: String
+
+> A getter which returns a name of a field.
+
 **Field.prototype.reset()**: Field
 
 > Sets the field to its default value.
@@ -688,7 +706,7 @@ user.$name.isChanged(); // -> calling field instance method
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
-| paths | String[][] | No | [] | A list of all invalid document paths (e.g. [['friends', 1, 'name'], ...])
+| paths | String[][] | No | [] | A list of all invalid model paths (e.g. [['friends', 1, 'name'], ...])
 | message | String | No | Validation failed | General error message.
 | code | Number | No | 422 | Error code.
 
