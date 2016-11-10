@@ -147,7 +147,7 @@ test('method `handle` should handle fields', async (t) => {
   let User = createModel(userSchema);
   let user = new User(data);
   let systemError = new Error('not found');
-  let handlerError = (new HandlerError('notFound', 'not found')).toObject();
+  let handlerError = {handler: 'notFound', message: 'not found', code: 422};
 
   // throws an error
   t.is(await user.handle(systemError), user);
@@ -167,12 +167,12 @@ test('method `handle` should handle fields', async (t) => {
     ['books', 1, 'title']
   ]);
   // errors are populated
-  t.deepEqual(user.$name.errors[0].toObject(), handlerError);
-  t.deepEqual(user.$book.errors[0].toObject(), handlerError);
-  t.deepEqual(user.book.$title.errors[0].toObject(), handlerError);
-  t.deepEqual(user.$books.errors[0].toObject(), handlerError);
+  t.deepEqual(user.$name.errors[0], handlerError);
+  t.deepEqual(user.$book.errors[0], handlerError);
+  t.deepEqual(user.book.$title.errors[0], handlerError);
+  t.deepEqual(user.$books.errors[0], handlerError);
   t.deepEqual(user.books[0], null);
-  t.deepEqual(user.books[1].$title.errors[0].toObject(), handlerError);
+  t.deepEqual(user.books[1].$title.errors[0], handlerError);
 });
 
 test('method `applyErrors` should set field `errors` property', async (t) => {
@@ -202,15 +202,13 @@ test('method `applyErrors` should set field `errors` property', async (t) => {
   };
   let User = createModel(userSchema);
   let user = new User(data);
-  let validatorData = {name: 'ValidatorError', validator: 'foo', message: 'bar'};
-  let handlerData = {name: 'HandlerError', validator: 'foo', message: 'bar'};
-  let validatorError = new ValidatorError(validatorData.validator, validatorData.message);
-  let handlerError = new HandlerError(handlerData.handler, handlerData.message);
+  let validatorError = {validator: 'foo', message: 'bar', code: 422};
+  let handlerError = {handler: 'foo', message: 'bar', code: 422};
 
   user.applyErrors([
-    {path: ['name'], errors: [validatorData]},
-    {path: ['newBook', 'title'], errors: [handlerData]},
-    {path: ['newBooks', 1, 'title'], errors: [validatorData]}
+    {path: ['name'], errors: [validatorError]},
+    {path: ['newBook', 'title'], errors: [handlerError]},
+    {path: ['newBooks', 1, 'title'], errors: [validatorError]}
   ]);
 
   t.deepEqual(user.$name.errors, [validatorError]);

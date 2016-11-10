@@ -1,11 +1,5 @@
-import {
-  ValidationError,
-  ValidatorError
-} from 'objectschema';
-import {HandlerError} from 'handleable';
+import {ValidationError} from 'objectschema';
 
 export {
-  ValidationError,
-  ValidatorError,
-  HandlerError
+  ValidationError
 }

@@ -15,8 +15,6 @@ var objectschema = _interopRequireWildcard(_objectschema);
 
 var _typeable = require('typeable');
 
-var _errors = require('./errors');
-
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -26,23 +24,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 */
 
 class Field extends objectschema.Field {
-
-  /*
-  * Returns the last error of the field.
-  */
-
-  _createError(data) {
-    switch (data.name) {
-      case 'ValidatorError':
-        return new _errors.ValidatorError(data.validator, data.message, data.code);
-      case 'HandlerError':
-        return new _errors.HandlerError(data.handler, data.message, data.code);
-      case 'Error':
-        return new Error(data.message);
-    }
-
-    throw new Error(`Unknown model field error`);
-  }
 
   /*
   * Handles the field by populating the `_errors` property.

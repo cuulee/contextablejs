@@ -75,8 +75,8 @@
     "mongodb": "2.2.x"
   },
   "dependencies": {
-    "handleable": "1.0.x",
-    "objectschema": "2.15.x",
-    "typeable": "1.1.x"
+    "handleable": "0.13.x",
+    "objectschema": "2.16.x",
+    "typeable": "0.15.x"
   }
 }
