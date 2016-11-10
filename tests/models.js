@@ -1,11 +1,6 @@
 const test = require('ava');
 const {Schema, Context} = require('../dist');
 const {createModel} = require('../dist/models');
-const {
-  ValidationError,
-  ValidatorError,
-  HandlerError
-} = require('../dist/errors');
 
 test('should allow static properties', (t) => {
   let context = {major: 1};
@@ -74,11 +69,12 @@ test('should allow instance methods', (t) => {
   t.is(user.getTime(), 110);
 });
 
-test('method `handle` should pass through a ValidationError', async (t) => {
+test('method `handle` should pass through a validation error', async (t) => {
   let User = createModel(new Schema());
   let user = new User();
 
-  let error = new ValidationError();
+  let error = new Error();
+  error.code = 422;
 
   t.is(await user.handle(error, {quiet: false}), user);
 });
@@ -146,16 +142,16 @@ test('method `handle` should handle fields', async (t) => {
   };
   let User = createModel(userSchema);
   let user = new User(data);
-  let systemError = new Error('not found');
-  let handlerError = {handler: 'notFound', message: 'not found', code: 422};
+  let problem = new Error('not found');
+  let result = {handler: 'notFound', message: 'not found', code: 422};
 
   // throws an error
-  t.is(await user.handle(systemError), user);
-  t.throws(user.handle(systemError, {quiet: false}), ValidationError);
+  t.is(await user.handle(problem), user);
+  t.throws(user.handle(problem, {quiet: false}), Error);
   // error paths
   let error = null;
   try {
-    await user.handle(systemError, {quiet: false});
+    await user.handle(problem, {quiet: false});
   } catch (e) {
     error = e;
   }
@@ -167,12 +163,12 @@ test('method `handle` should handle fields', async (t) => {
     ['books', 1, 'title']
   ]);
   // errors are populated
-  t.deepEqual(user.$name.errors[0], handlerError);
-  t.deepEqual(user.$book.errors[0], handlerError);
-  t.deepEqual(user.book.$title.errors[0], handlerError);
-  t.deepEqual(user.$books.errors[0], handlerError);
+  t.deepEqual(user.$name.errors[0], result);
+  t.deepEqual(user.$book.errors[0], result);
+  t.deepEqual(user.book.$title.errors[0], result);
+  t.deepEqual(user.$books.errors[0], result);
   t.deepEqual(user.books[0], null);
-  t.deepEqual(user.books[1].$title.errors[0], handlerError);
+  t.deepEqual(user.books[1].$title.errors[0], result);
 });
 
 test('method `applyErrors` should set field `errors` property', async (t) => {
@@ -203,16 +199,16 @@ test('method `applyErrors` should set field `errors` property', async (t) => {
   let User = createModel(userSchema);
   let user = new User(data);
   let validatorError = {validator: 'foo', message: 'bar', code: 422};
-  let handlerError = {handler: 'foo', message: 'bar', code: 422};
+  let result = {handler: 'foo', message: 'bar', code: 422};
 
   user.applyErrors([
     {path: ['name'], errors: [validatorError]},
-    {path: ['newBook', 'title'], errors: [handlerError]},
+    {path: ['newBook', 'title'], errors: [result]},
     {path: ['newBooks', 1, 'title'], errors: [validatorError]}
   ]);
 
   t.deepEqual(user.$name.errors, [validatorError]);
-  t.deepEqual(user.newBook.$title.errors, [handlerError]);
+  t.deepEqual(user.newBook.$title.errors, [result]);
   t.deepEqual(user.newBooks[0].$title.errors, []);
   t.deepEqual(user.newBooks[1].$title.errors, [validatorError]);
 });

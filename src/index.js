@@ -1,6 +1,5 @@
 import {Schema} from './schemas';
 import {Context} from './contexts';
-import {ValidationError} from './errors';
 
 /*
 * Exposing public classes.
@@ -8,6 +7,5 @@ import {ValidationError} from './errors';
 
 export {
   Schema,
-  Context,
-  ValidationError
+  Context
 };

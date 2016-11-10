@@ -8,7 +8,6 @@ import {
 import {Document} from 'objectschema';
 import {Handler} from 'handleable';
 import {Schema} from './schemas';
-import {ValidationError} from './errors';
 import {Field} from './fields';
 
 /*
@@ -79,12 +78,12 @@ export function createModel (schema, context=null) {
     }
 
     /*
-    * If the error isn's an instance of ValidationError, then it tries to create
-    * one by checking document fields against handlers.
+    * If the error is not a validation error, then it tries to create one by
+    * checking document fields against handlers.
     */
 
     async handle (error, {quiet = true} = {}) {
-      if (error instanceof ValidationError) return this;
+      if (error.code === 422) return this;
 
       let {fields} = this.$schema;
       for (let path in fields) {

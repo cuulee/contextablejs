@@ -70,6 +70,13 @@ Run the command below to install the package.
 $ npm install --save contextable
 ```
 
+This package is targeting `es2015`. If you plan to use it in a browser, you need to transpile it with [Babel](https://babeljs.io) or similar tool.
+
+To support browsers `>= IE9` you need to
+* use the [preset-es2015](https://babeljs.io/docs/plugins/preset-es2015/) preset,
+* include [Babel polyfill](https://babeljs.io/docs/usage/polyfill),
+* use plugins [syntax-async-functions](https://babeljs.io/docs/plugins/syntax-async-functions),  [transform-regenerator](https://babeljs.io/docs/plugins/transform-regenerator/) and [transform-object-assign](https://www.npmjs.com/package/babel-plugin-transform-object-assign).
+
 ## Usage
 
 Below, we create a simple example to show the benefit of using `Contextable.js` in your [Node.js](https://nodejs.org) project. In this tutorial we create a new context instance with a User model attached, then we insert a user document in a [MongoDB](https://www.mongodb.com) database. The example also explains the concept of validation and error handling.
@@ -228,7 +235,7 @@ let user = new User({
 });
 
 try {
-  await user.validate(); // throws a ValidationError when fields are invalid
+  await user.validate(); // throws a validation error when fields are invalid
   await user.insert(); // our custom method which saves input data to a database
 }
 catch (e) {
@@ -411,12 +418,12 @@ A model provides a unified validation and error handling mechanism.
 
 ```js
 try {
-  await model.validate(); // throws a ValidationError when fields are invalid
+  await model.validate(); // throws a validation error when fields are invalid
 }
 catch (e) {
-  await model.handle(e); // creates a ValidationError from handlers, updates the `user.$error` or throws
+  await model.handle(e); // creates a validation error from handlers, updates the `user.$error` or throws
 }
-model.$error; // holds the last ValidationError instance
+model.$error; // holds the last validation error instance
 ```
 
 **Model.$context**: Context
@@ -457,9 +464,9 @@ doc.applyErrors([
     path: ['name'], // field path
     errors: [
       {
-        name: 'ValidatorError', // error class name (ValidatorError, HandlerError or Error)
         validator: 'presence',  // validator name
-        message: 'is required' // validator message
+        message: 'is required', // validator message
+        code: 422 // error code
       }
     ]
   },
@@ -467,9 +474,9 @@ doc.applyErrors([
     path: ['newBook', 'title'],
     errors: [
       {
-        name: 'HandlerError',
         handler: 'fooHandler',
-        message: 'is not foo'
+        message: 'is not foo',
+        code: 422 // error code
       }
     ]
   },
@@ -477,9 +484,9 @@ doc.applyErrors([
     path: ['newBooks', 1, 'title'],
     errors: [
       {
-        name: 'ValidatorError',
         validator: 'presence',
-        message: 'is required'
+        message: 'is required',
+        code: 422 // error code
       }
     ]
   }
@@ -496,7 +503,7 @@ doc.applyErrors([
 
 **Model.prototype.collectErrors()**: Array
 
-> Returns a list of errors for all the fields (e.g. [{path: ['name'], errors: [ValidatorError(), ...]}]).
+> Returns a list of errors for all the fields (e.g. [{path, errors}[]).
 
 **Model.prototype.commit()**: Model
 
@@ -520,16 +527,16 @@ doc.applyErrors([
 
 **Model.prototype.handle(error, {quiet})**: Promise(Model)
 
-> If the error isn't an instance of ValidationError, then it tries to handle it against fields handlers. If the method is unable to handle the error, the error is thrown.
+> If the error isn't an instance of validation error, then it tries to handle it against fields handlers. If the method is unable to handle the error, the error is thrown.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
 | error | Error | Yes | - | Instance of an Error object.
-| quiet | Boolean | No | true | When set to true, a handled ValidationError is thrown. This doesn't affect the unhandled errors (they are always thrown).
+| quiet | Boolean | No | true | When set to true, a handled validation error is thrown. This doesn't affect the unhandled errors (they are always thrown).
 
 ```js
 try {
-  await model.validate(); // throws a ValidationError when fields are invalid
+  await model.validate(); // throws a validation error when fields are invalid
 }
 catch (e) {
   await model.handle(e); // handles `e` or throws it if unhandled
@@ -584,18 +591,18 @@ user.collectErrors(); // -> an array of all errors (including those deeply neste
 
 **Model.prototype.validate({quiet})**: Promise(Model)
 
-> Validates model fields and throws a ValidationError error if not all fields are valid unless the `quiet` is set to `true`.
+> Validates model fields and throws a validation error error if not all fields are valid unless the `quiet` is set to `true`.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
-| quiet | Boolean | No | false | When set to `true`, a ValidationError is thrown.
+| quiet | Boolean | No | false | When set to `true`, a validation error is thrown.
 
 ```js
 try {
-  await doc.validate(); // throws a ValidationError when fields are invalid
+  await doc.validate(); // throws a validation error when fields are invalid
 }
 catch (e) {
-  // `e` is an instance of ValidationError, which holds errors for all invalid fields (including those deeply nested)
+  // `e` is an instance of validation error, which holds errors for all invalid fields (including those deeply nested)
 }
 ```
 
@@ -697,42 +704,6 @@ user.$name.isChanged(); // calling field instance method
 **Field.prototype.value**: Any
 
 > A getter and setter for the value of the field.
-
-### ValidationError
-
-**ValidationError(message, code)**
-
-> A validation error class which is triggered by method `validate` when not all fields are valid.
-
-| Option | Type | Required | Default | Description
-|--------|------|----------|---------|------------
-| paths | String[][] | No | [] | A list of all invalid model paths (e.g. [['friends', 1, 'name'], ...])
-| message | String | No | Validation failed | General error message.
-| code | Number | No | 422 | Error code.
-
-### ValidatorError
-
-**ValidatorError(validator, message, code)**
-
-> A validator error class, provided by the `validatable.js`, which holds information about the validators which do not approve a value that has just been validated.
-
-| Option | Type | Required | Default | Description
-|--------|------|----------|---------|------------
-| validator | String | Yes | - | Validator name.
-| message | String | No | null | Validation error message.
-| code | Integer | No | 422 | Error status code.
-
-### HandlerError
-
-**HandlerError(handler, message, code)**
-
-> Handled error class which holds information about the handled error.
-
-| Option | Type | Required | Default | Description
-|--------|------|----------|---------|------------
-| handler | String | Yes | - | Handler name.
-| message | String | No | null | Handler error message.
-| code | Integer | No | 422 | Error status code.
 
 ## Example
 
