@@ -12,6 +12,14 @@ var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
 
+var _defineProperty = require('babel-runtime/core-js/object/define-property');
+
+var _defineProperty2 = _interopRequireDefault(_defineProperty);
+
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
@@ -79,7 +87,7 @@ function createModel(schema) {
         relatedSchema = schema;
       }
 
-      var _this = (0, _possibleConstructorReturn3.default)(this, (Model.__proto__ || Object.getPrototypeOf(Model)).call(this, relatedSchema, data));
+      var _this = (0, _possibleConstructorReturn3.default)(this, (Model.__proto__ || (0, _getPrototypeOf2.default)(Model)).call(this, relatedSchema, data));
 
       Object.defineProperty(_this, '$context', {
         value: context
@@ -91,7 +99,7 @@ function createModel(schema) {
       for (var name in instanceMethods) {
         var method = instanceMethods[name];
 
-        Object.defineProperty(_this, name, {
+        (0, _defineProperty2.default)(_this, name, {
           value: method
         });
       }
@@ -102,7 +110,7 @@ function createModel(schema) {
             set = _instanceVirtuals$_na.set;
 
 
-        Object.defineProperty(_this, _name, {
+        (0, _defineProperty2.default)(_this, _name, {
           get: get,
           set: set,
           enumerable: true // expose as object key
@@ -222,7 +230,7 @@ function createModel(schema) {
   for (var name in classMethods) {
     var method = classMethods[name];
 
-    Object.defineProperty(Model, name, {
+    (0, _defineProperty2.default)(Model, name, {
       value: method.bind(Model)
     });
   }
@@ -233,7 +241,7 @@ function createModel(schema) {
         set = _classVirtuals$_name.set;
 
 
-    Object.defineProperty(Model, _name2, {
+    (0, _defineProperty2.default)(Model, _name2, {
       get: get ? get.bind(Model) : undefined,
       set: set ? set.bind(Model) : undefined,
       enumerable: true // expose as object key

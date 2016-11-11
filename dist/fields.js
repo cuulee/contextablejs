@@ -9,6 +9,14 @@ var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
+var _getIterator2 = require('babel-runtime/core-js/get-iterator');
+
+var _getIterator3 = _interopRequireDefault(_getIterator2);
+
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
@@ -44,7 +52,7 @@ var Field = exports.Field = function (_objectschema$Field) {
 
   function Field() {
     (0, _classCallCheck3.default)(this, Field);
-    return (0, _possibleConstructorReturn3.default)(this, (Field.__proto__ || Object.getPrototypeOf(Field)).apply(this, arguments));
+    return (0, _possibleConstructorReturn3.default)(this, (Field.__proto__ || (0, _getPrototypeOf2.default)(Field)).apply(this, arguments));
   }
 
   (0, _createClass3.default)(Field, [{
@@ -68,7 +76,7 @@ var Field = exports.Field = function (_objectschema$Field) {
               _didIteratorError = false;
               _iteratorError = undefined;
               _context.prev = 4;
-              _iterator = relatives[Symbol.iterator]();
+              _iterator = (0, _getIterator3.default)(relatives);
 
             case 6:
               if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {

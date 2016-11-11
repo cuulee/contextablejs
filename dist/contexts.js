@@ -9,6 +9,10 @@ var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
 
+var _defineProperty = require('babel-runtime/core-js/object/define-property');
+
+var _defineProperty2 = _interopRequireDefault(_defineProperty);
+
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
@@ -58,7 +62,7 @@ var Context = exports.Context = function () {
   (0, _createClass3.default)(Context, [{
     key: 'defineProperty',
     value: function defineProperty(name, descriptor) {
-      Object.defineProperty(this, name, descriptor);
+      (0, _defineProperty2.default)(this, name, descriptor);
 
       return this[name];
     }

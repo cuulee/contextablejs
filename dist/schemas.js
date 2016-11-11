@@ -9,6 +9,10 @@ var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
 
 var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
 
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
@@ -67,7 +71,7 @@ var Schema = exports.Schema = function (_objectschema$Schema) {
 
     (0, _classCallCheck3.default)(this, Schema);
 
-    var _this = (0, _possibleConstructorReturn3.default)(this, (Schema.__proto__ || Object.getPrototypeOf(Schema)).call(this, { mixins: mixins, fields: fields, strict: strict, validatorOptions: validatorOptions, typeOptions: typeOptions }));
+    var _this = (0, _possibleConstructorReturn3.default)(this, (Schema.__proto__ || (0, _getPrototypeOf2.default)(Schema)).call(this, { mixins: mixins, fields: fields, strict: strict, validatorOptions: validatorOptions, typeOptions: typeOptions }));
 
     Object.defineProperty(_this, 'handlerOptions', { // handleable.js configuration options
       get: function get() {
