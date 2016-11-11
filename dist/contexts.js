@@ -5,13 +5,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Context = undefined;
 
-var _assign = require('babel-runtime/core-js/object/assign');
+var _extends2 = require('babel-runtime/helpers/extends');
 
-var _assign2 = _interopRequireDefault(_assign);
-
-var _defineProperty = require('babel-runtime/core-js/object/define-property');
-
-var _defineProperty2 = _interopRequireDefault(_defineProperty);
+var _extends3 = _interopRequireDefault(_extends2);
 
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
@@ -62,7 +58,7 @@ var Context = exports.Context = function () {
   (0, _createClass3.default)(Context, [{
     key: 'defineProperty',
     value: function defineProperty(name, descriptor) {
-      (0, _defineProperty2.default)(this, name, descriptor);
+      Object.defineProperty(this, name, descriptor);
 
       return this[name];
     }
@@ -78,7 +74,7 @@ var Context = exports.Context = function () {
 
       var model = (0, _models.createModel)(schema, this);
 
-      var descriptor = (0, _assign2.default)({
+      var descriptor = (0, _extends3.default)({
         enumerable: true
       }, options, {
         get: function get() {

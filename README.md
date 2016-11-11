@@ -4,7 +4,7 @@
 
 > Simple, unopinionated and minimalist framework for creating context objects with support for unopinionated ORM, object schemas, type casting, validation and error handling.
 
-This is a light weight open source package. It has a reach API which significantly simplifies server-side and client-side data validation and manipulation. The source code is available on [GitHub](https://github.com/xpepermint/contextablejs) where you can also find our [issue tracker](https://github.com/xpepermint/contextablejs/issues).
+This is a light weight open source package for use on **server** or in **browser** (using module bundler). It has a reach API which significantly simplifies server-side and client-side data validation and manipulation. The source code is available on [GitHub](https://github.com/xpepermint/contextablejs) where you can also find our [issue tracker](https://github.com/xpepermint/contextablejs/issues).
 
 <img src="giphy.gif" width="300" />
 
@@ -69,13 +69,6 @@ Run the command below to install the package.
 ```
 $ npm install --save contextable
 ```
-
-This package is targeting `es2015`. If you plan to use it in a browser, you need to transpile it with [Babel](https://babeljs.io) or similar tool.
-
-To support browsers `>= IE9` you need to
-* use the [preset-es2015](https://babeljs.io/docs/plugins/preset-es2015/) preset,
-* include [Babel polyfill](https://babeljs.io/docs/usage/polyfill),
-* use plugins [syntax-async-functions](https://babeljs.io/docs/plugins/syntax-async-functions),  [transform-regenerator](https://babeljs.io/docs/plugins/transform-regenerator/) and [transform-object-assign](https://www.npmjs.com/package/babel-plugin-transform-object-assign).
 
 ## Usage
 
@@ -458,6 +451,10 @@ model.$error; // holds the last validation error instance
 
 > Deeply populates fields with the provided `errors`.
 
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| errors | Array | No | [] | An array of errors.
+
 ```js
 doc.applyErrors([
   {
@@ -591,7 +588,7 @@ user.collectErrors(); // -> an array of all errors (including those deeply neste
 
 **Model.prototype.validate({quiet})**: Promise(Model)
 
-> Validates model fields and throws a validation error error if not all fields are valid unless the `quiet` is set to `true`.
+> Validates model fields and throws a validation error if not all fields are valid unless the `quiet` is set to `true`.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------

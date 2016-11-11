@@ -8,21 +8,9 @@ var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
-var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
+var _extends2 = require('babel-runtime/helpers/extends');
 
-var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
-
-var _assign = require('babel-runtime/core-js/object/assign');
-
-var _assign2 = _interopRequireDefault(_assign);
-
-var _defineProperty = require('babel-runtime/core-js/object/define-property');
-
-var _defineProperty2 = _interopRequireDefault(_defineProperty);
-
-var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
-
-var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+var _extends3 = _interopRequireDefault(_extends2);
 
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
@@ -91,7 +79,7 @@ function createModel(schema) {
         relatedSchema = schema;
       }
 
-      var _this = (0, _possibleConstructorReturn3.default)(this, (Model.__proto__ || (0, _getPrototypeOf2.default)(Model)).call(this, relatedSchema, data));
+      var _this = (0, _possibleConstructorReturn3.default)(this, (Model.__proto__ || Object.getPrototypeOf(Model)).call(this, relatedSchema, data));
 
       Object.defineProperty(_this, '$context', {
         value: context
@@ -103,7 +91,7 @@ function createModel(schema) {
       for (var name in instanceMethods) {
         var method = instanceMethods[name];
 
-        (0, _defineProperty2.default)(_this, name, {
+        Object.defineProperty(_this, name, {
           value: method
         });
       }
@@ -114,7 +102,7 @@ function createModel(schema) {
             set = _instanceVirtuals$_na.set;
 
 
-        (0, _defineProperty2.default)(_this, _name, {
+        Object.defineProperty(_this, _name, {
           get: get,
           set: set,
           enumerable: true // expose as object key
@@ -130,7 +118,7 @@ function createModel(schema) {
     (0, _createClass3.default)(Model, [{
       key: '_createHandler',
       value: function _createHandler() {
-        return new _handleable.Handler((0, _assign2.default)({}, this.$schema.handlerOptions, { context: this }));
+        return new _handleable.Handler((0, _extends3.default)({}, this.$schema.handlerOptions, { context: this }));
       }
 
       /*
@@ -150,81 +138,73 @@ function createModel(schema) {
 
     }, {
       key: 'handle',
-      value: function () {
-        var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee(error) {
-          var _ref2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-              _ref2$quiet = _ref2.quiet,
-              quiet = _ref2$quiet === undefined ? true : _ref2$quiet;
+      value: function handle(error) {
+        var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+            _ref$quiet = _ref.quiet,
+            quiet = _ref$quiet === undefined ? true : _ref$quiet;
 
-          var fields, path, paths, _error;
+        var fields, path, paths, _error;
 
-          return _regenerator2.default.wrap(function _callee$(_context) {
-            while (1) {
-              switch (_context.prev = _context.next) {
-                case 0:
-                  if (!(error.code === 422)) {
-                    _context.next = 2;
-                    break;
-                  }
-
-                  return _context.abrupt('return', this);
-
-                case 2:
-                  fields = this.$schema.fields;
-                  _context.t0 = _regenerator2.default.keys(fields);
-
-                case 4:
-                  if ((_context.t1 = _context.t0()).done) {
-                    _context.next = 10;
-                    break;
-                  }
-
-                  path = _context.t1.value;
-                  _context.next = 8;
-                  return this['$' + path].handle(error);
-
-                case 8:
-                  _context.next = 4;
+        return _regenerator2.default.async(function handle$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                if (!(error.code === 422)) {
+                  _context.next = 2;
                   break;
+                }
 
-                case 10:
-                  paths = this.collectErrors().map(function (e) {
-                    return e.path;
-                  });
+                return _context.abrupt('return', this);
 
-                  if (!(!quiet && paths.length > 0)) {
-                    _context.next = 16;
-                    break;
-                  }
+              case 2:
+                fields = this.$schema.fields;
+                _context.t0 = _regenerator2.default.keys(fields);
 
-                  _error = this._createValidationError(paths);
-                  throw _error;
+              case 4:
+                if ((_context.t1 = _context.t0()).done) {
+                  _context.next = 10;
+                  break;
+                }
 
-                case 16:
-                  if (!(paths.length === 0)) {
-                    _context.next = 18;
-                    break;
-                  }
+                path = _context.t1.value;
+                _context.next = 8;
+                return _regenerator2.default.awrap(this['$' + path].handle(error));
 
-                  throw error;
+              case 8:
+                _context.next = 4;
+                break;
 
-                case 18:
-                  return _context.abrupt('return', this);
+              case 10:
+                paths = this.collectErrors().map(function (e) {
+                  return e.path;
+                });
 
-                case 19:
-                case 'end':
-                  return _context.stop();
-              }
+                if (!(!quiet && paths.length > 0)) {
+                  _context.next = 16;
+                  break;
+                }
+
+                _error = this._createValidationError(paths);
+                throw _error;
+
+              case 16:
+                if (!(paths.length === 0)) {
+                  _context.next = 18;
+                  break;
+                }
+
+                throw error;
+
+              case 18:
+                return _context.abrupt('return', this);
+
+              case 19:
+              case 'end':
+                return _context.stop();
             }
-          }, _callee, this);
-        }));
-
-        function handle(_x2, _x3) {
-          return _ref.apply(this, arguments);
-        }
-
-        return handle;
-      }()
+          }
+        }, null, this);
+      }
     }]);
     return Model;
   }(_objectschema.Document);
@@ -242,7 +222,7 @@ function createModel(schema) {
   for (var name in classMethods) {
     var method = classMethods[name];
 
-    (0, _defineProperty2.default)(Model, name, {
+    Object.defineProperty(Model, name, {
       value: method.bind(Model)
     });
   }
@@ -253,7 +233,7 @@ function createModel(schema) {
         set = _classVirtuals$_name.set;
 
 
-    (0, _defineProperty2.default)(Model, _name2, {
+    Object.defineProperty(Model, _name2, {
       get: get ? get.bind(Model) : undefined,
       set: set ? set.bind(Model) : undefined,
       enumerable: true // expose as object key
