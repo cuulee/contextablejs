@@ -1,12 +1,23 @@
 ![Build Status](https://travis-ci.org/xpepermint/contextablejs.svg?branch=master)&nbsp;[![NPM Version](https://badge.fury.io/js/contextable.svg)](https://badge.fury.io/js/contextable)&nbsp;[![Dependency Status](https://gemnasium.com/xpepermint/contextablejs.svg)](https://gemnasium.com/xpepermint/contextablejs)
 
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│                   _            _        _     _         _       │
+│    ___ ___  _ __ | |_ _____  _| |_ __ _| |__ | | ___   (_)___   │
+│   / __/ _ \| '_ \| __/ _ \ \/ / __/ _` | '_ \| |/ _ \  | / __|  │
+│  | (_| (_) | | | | ||  __/>  <| || (_| | |_) | |  __/_ | \__ \  │
+│   \___\___/|_| |_|\__\___/_/\_\\__\__,_|_.__/|_|\___(_)/ |___/  │
+│                                                      |__/       │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
 # contextable.js
 
 > Simple, unopinionated and minimalist framework for creating context objects with support for unopinionated ORM, object schemas, type casting, validation and error handling.
 
 This is a light weight open source package for use on **server** or in **browser** (using module bundler). It has a reach API which significantly simplifies server-side and client-side data validation and manipulation. The source code is available on [GitHub](https://github.com/xpepermint/contextablejs) where you can also find our [issue tracker](https://github.com/xpepermint/contextablejs/issues).
-
-<img src="giphy.gif" width="300" />
 
 ## Features
 
