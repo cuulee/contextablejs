@@ -33,7 +33,7 @@ import {ApplicationContext} from './context';
 
   // displaying user
   if (!user.isValid()) {
-    console.log('Mongo Error:', user.collectErrors()[0].errors.map((e) => e.toObject()));
+    console.log('Mongo Error:', user.collectErrors()[0].errors[0]);
   }
 
   console.log('User Object:', JSON.stringify(user, null, 2));
