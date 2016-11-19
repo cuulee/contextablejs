@@ -35,13 +35,22 @@ This is a light weight open source package for use on **server** or in **browser
 * Advanced field validation
 * Enhanced error handling
 
-## Related Projects
+## Related
+
+### Projects
 
 * [vue-contextable.js](https://github.com/xpepermint/vue-contextable): Contextable.js plugin for [Vue.js](https://vuejs.org/) v2.
 * [objectSchema.js](https://github.com/xpepermint/objectschemajs): Advanced schema enforced JavaScript objects.
 * [validatable.js](https://github.com/xpepermint/validatablejs): A library for synchronous and asynchronous validation.
 * [handleable.js](https://github.com/xpepermint/handleablejs): A library for synchronous and asynchronous error handling.
 * [typeable.js](https://github.com/xpepermint/typeablejs): A library for checking and casting types.
+
+### Examples
+
+An example application is available in the `./example` folder. You can start the example by executing the `npm run example` command from the command-line.
+
+* [graphql-example](https://github.com/xpepermint/graphql-example): A GraphQL application example (intuitive rootValue resolvers using contextable.js)
+* [vue-example](https://github.com/xpepermint/vue-example): Vue.js example application (server-side rendering, router, vuex store, forms validation with contextable.js)
 
 ## Motivation
 
@@ -712,10 +721,6 @@ user.$name.isChanged(); // calling field instance method
 **Field.prototype.value**: Any
 
 > A getter and setter for the value of the field.
-
-## Example
-
-An example application is available in the `./example` folder. You can start the example by executing the `npm run example` command.
 
 ## License (MIT)
 
