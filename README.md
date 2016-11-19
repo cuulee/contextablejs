@@ -268,7 +268,7 @@ user.collectErrors(); // -> an array of all errors (including those deeply neste
 Contextable.js can be used as a [GraphQL](http://graphql.org) `rootValue` resolver. Let's take an example from the official [GraphQL website](http://graphql.org).
 
 ```js
-var { graphql, buildSchema } = require('graphql');
+var {graphql, buildSchema} = require('graphql');
 
 var schema = buildSchema(`
   type Query {
@@ -276,9 +276,9 @@ var schema = buildSchema(`
   }
 `);
 
-var root = { hello: () => 'Hello world!' }; // root resolver
+var root = {hello: () => 'Hello world!'}; // root resolver
 
-graphql(schema, '{ hello }', root).then((response) => {
+graphql(schema, '{hello}', root).then((response) => {
   console.log(response);
 });
 ```
@@ -286,9 +286,9 @@ graphql(schema, '{ hello }', root).then((response) => {
 The `root` variable above represents a GraphQL root resolver. We can easily replace it with a powerful and context-aware model.
 
 ```js
-var { Context, Schema } = require('contextable');
+var {Context, Schema} = require('contextable');
 
-var context = new Context({ userId: 100 });
+var context = new Context();
 context.defineModel('Root', new Schema({
   instanceMethods: {
     hello () { return 'Hello world!' }
