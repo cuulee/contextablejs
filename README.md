@@ -35,15 +35,15 @@ This is a light weight open source package for use on **server** or in **browser
 * Advanced field validation
 * Enhanced error handling
 
-## Related
+## Projects
 
-### Projects
+### Packages
 
-* [vue-contextable.js](https://github.com/xpepermint/vue-contextable): Contextable.js plugin for [Vue.js](https://vuejs.org/) v2.
-* [objectSchema.js](https://github.com/xpepermint/objectschemajs): Advanced schema enforced JavaScript objects.
-* [validatable.js](https://github.com/xpepermint/validatablejs): A library for synchronous and asynchronous validation.
-* [handleable.js](https://github.com/xpepermint/handleablejs): A library for synchronous and asynchronous error handling.
-* [typeable.js](https://github.com/xpepermint/typeablejs): A library for checking and casting types.
+* [vue-contextable.js](https://github.com/xpepermint/vue-contextable): [related] Contextable.js plugin for [Vue.js](https://vuejs.org/) v2.
+* [objectSchema.js](https://github.com/xpepermint/objectschemajs): [dependency] Advanced schema enforced JavaScript objects.
+* [validatable.js](https://github.com/xpepermint/validatablejs): [dependency] A library for synchronous and asynchronous validation.
+* [handleable.js](https://github.com/xpepermint/handleablejs): [dependency] A library for synchronous and asynchronous error handling.
+* [typeable.js](https://github.com/xpepermint/typeablejs): [dependency] A library for checking and casting types.
 
 ### Examples
 
@@ -91,6 +91,8 @@ $ npm install --save contextable
 ```
 
 ## Usage
+
+### Detailed Tutorial
 
 Below, we create a simple example to show the benefit of using `Contextable.js` in your [Node.js](https://nodejs.org) project. In this tutorial we create a new context instance with a User model attached, then we insert a user document in a [MongoDB](https://www.mongodb.com) database. The example also explains the concept of validation and error handling.
 
@@ -260,6 +262,45 @@ user.$firstName; // -> reference to a field class instance
 user.$firstName.errors; // -> an array of field-specific errors
 user.collectErrors(); // -> an array of all errors (including those deeply nested)
 ```
+
+### GraphQL Root Resolver
+
+Contextable.js can be used as a [GraphQL](http://graphql.org) `rootValue` resolver. Let's take an example from the official [GraphQL website](http://graphql.org).
+
+```js
+var { graphql, buildSchema } = require('graphql');
+
+var schema = buildSchema(`
+  type Query {
+    hello: String
+  }
+`);
+
+var root = { hello: () => 'Hello world!' }; // root resolver
+
+graphql(schema, '{ hello }', root).then((response) => {
+  console.log(response);
+});
+```
+
+The `root` variable above represents a GraphQL root resolver. We can easily replace it with a powerful and context-aware model.
+
+```js
+var { Context, Schema } = require('contextable');
+
+var context = new Context({ userId: 100 });
+context.defineModel('Root', new Schema({
+  instanceMethods: {
+    hello () { return 'Hello world!' }
+  }
+}));
+
+var root = new context.Root();
+```
+
+By replacing the `root` variable line with the code above we get a powerful context-aware resolving system on steroids with all the available feature that are provided by the `contextable.js`.
+
+The [graphql-example](https://github.com/xpepermint/graphql-example) project is a real-life implementation example where you will find all the details (nested schema, input validation, database implementation, project structure and more).
 
 ## API
 
