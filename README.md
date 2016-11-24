@@ -19,6 +19,8 @@
 
 This is a light weight open source package for use on **server** or in **browser** (using module bundler). It has a reach API which significantly simplifies server-side and client-side data validation and manipulation. The source code is available on [GitHub](https://github.com/xpepermint/contextablejs) where you can also find our [issue tracker](https://github.com/xpepermint/contextablejs/issues).
 
+<img src="giphy.gif" width="300" />
+
 ## Features
 
 * Context object
@@ -335,20 +337,22 @@ A Schema can also be used as a custom type object. This way you can create a nes
 export const fields = {
   mixins: [animalSchema, catSchema], // schema extensions
   email: { // a field name holding a field definition
-    type: 'String', // a field data type provided by typeable.js
+    type: 'String', // [required] a field data type provided by typeable.js
     defaultValue: 'John Smith', // a default field value (can be a value of a function)
     fakeValue: 'John Smith', // a fake field value (can be a value of a function)
     validate: [ // field validations provided by validatable.js
       { // validator recipe
-        validator: 'presence',  // validator name
-        message: 'is required' // validator error message
+        validator: 'presence',  // [required] validator name
+        message: 'is required', // [required] validator error message
+        condition () { return true } // condition to switch off the validator
       }
     ],
     handle: [ // error handling provided by handle
       { // handler recipe
-        handler: 'mongoUniqueness', // handler name
-        message: 'already taken', // handler error message
+        handler: 'mongoUniqueness', // [required] handler name
+        message: 'already taken', // [required] handler error message
         indexName: 'uniqEmail' // handler-specific property
+        condition () { return true }, // condition to switch off the validator
       }
     ]
   }
