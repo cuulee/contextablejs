@@ -15,20 +15,21 @@ export class Schema extends objectschema.Schema {
     mixins = [],
     fields = {},
     strict = true,
-    validatorOptions = {},
-    typeOptions = {},
-    handlerOptions = {},
+    validators = {},
+    types = {},
+    firstErrorOnly = false,
+    handlers = {},
     classMethods = {},
     classVirtuals = {},
     instanceMethods = {},
     instanceVirtuals = {}
   } = {}) {
-    super({mixins, fields, strict, validatorOptions, typeOptions});
+    super({mixins, fields, strict, validators, types, firstErrorOnly});
 
-    Object.defineProperty(this, 'handlerOptions', { // handleable.js configuration options
+    Object.defineProperty(this, 'handlers', { // handleable.js configuration options
       get: () => merge(
-        ...mixins.map((v) => v.handlerOptions),
-        handlerOptions
+        ...mixins.map((v) => v.handlers),
+        handlers
       ),
       enumerable: true // required for deep nesting
     });

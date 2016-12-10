@@ -1,5 +1,7 @@
+import {cast} from 'typeable';
 import * as objectschema from 'objectschema';
 import {toArray} from 'typeable';
+import {Document} from './documents';
 
 /*
 * Document field class.

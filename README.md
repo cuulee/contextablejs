@@ -32,6 +32,7 @@ This is a light weight open source package for use on **server** or in **browser
 * Field value transformation with getter and setter
 * Strict and relaxed schemas
 * Schema mixins for extending schemas
+* Model serialization and filtering
 * Model nesting with support for self referencing
 * Change tracking, data commits and rollbacks
 * Advanced field validation
@@ -316,7 +317,7 @@ Schema represents a configuration object from which a `Model` can be created. It
 
 A Schema can also be used as a custom type object. This way you can create a nested data structure by setting a schema instance for a field `type`. When a model is created, each schema in a tree of fields will become an instance of a Model - thus we get a tree of models.
 
-**new Schema({mixins, fields, strict, validatorOptions, typeOptions, handlerOptions, classMethods, classVirtuals, instanceMethods, instanceVirtuals)**
+**new Schema({mixins, fields, strict, validators, types, handlers, classMethods, classVirtuals, instanceMethods, instanceVirtuals)**
 
 > A class for defining model structure.
 
@@ -325,9 +326,10 @@ A Schema can also be used as a custom type object. This way you can create a nes
 | mixins | [] | No | [] | A list of schema instances from which to extend the schema.
 | fields | Object | Yes | - | An object with fields definition. You should pass a function which returns the definition object in case of self referencing.
 | strict | Boolean | No | true | A schema type (set to false to allow dynamic fields not defined by schema).
-| validatorOptions | Object | No | validatable.js defaults | Configuration options for the Validator class, provided by the [validatable.js](https://github.com/xpepermint/validatablejs), which is used for field validation.
-| typeOptions | Object | No | typeable.js defaults | Configuration options for the cast method provided by the [typeable.js](https://github.com/xpepermint/typeablejs), which is used for data type casting.
-| handlerOptions | Object | No | handleable.js defaults | Configuration options for the Handler class, provided by the [handleable.js](https://github.com/xpepermint/handleablejs), which is used for field error handling.
+| validators | Object | No | validatable.js defaults | Custom validators for  [validatable.js](https://github.com/xpepermint/validatablejs).
+| types | Object | No | typeable.js defaults | Custom types for  [typeable.js](https://github.com/xpepermint/typeablejs).
+| handlers | Object | No | handleable.js defaults | Custom handlers for  [handleable.js](https://github.com/xpepermint/handleablejs).
+| firstErrorOnly | Boolean | No | false | When set to true, the validation stops after the first error.
 | classMethods | Object | No | - | An object defining model's class methods.
 | classVirtuals | Object | No | - | An object defining model's enumerable class virtual properties.
 | instanceMethods | Object | No | - | An object defining model's instance methods.
@@ -360,11 +362,13 @@ export const fields = {
 
 export const strict = true; // schema mode
 
-export const validatorOptions = {}; // validatable.js configuration options (see the package's page for details)
+export const validators = {}; // validatable.js configuration options (see the package's page for details)
 
-export const typeOptions = {}; // typeable.js configuration options (see the package's page for details)
+export const types = {}; // typeable.js configuration options (see the package's page for details)
 
-export const handlerOptions = {}; // handleable.js configuration options (see the package's page for details)
+export const handlers = {}; // handleable.js configuration options (see the package's page for details)
+
+export const firstErrorOnly = false; // validatable.js and handleable.js configuration option
 
 export const classMethods = {
   ping() { /* do something */ } // synchronous or asynchronous
@@ -391,9 +395,10 @@ export const instanceVirtuals = {
 export const schema = new Schema({
   fields,
   strict,
-  validatorOptions,
-  typeOptions,
-  handlerOptions,
+  validators,
+  types,
+  handlers,
+  firstErrorOnly,
   classMethods,
   classVirtuals,
   instanceMethods,
@@ -401,19 +406,19 @@ export const schema = new Schema({
 });
 ```
 
-This package uses [typeable.js](https://github.com/xpepermint/typeablejs) for data type casting. Many common data types and array types are supported but we can also define custom types or override existing types through a `typeOptions` key. Please check package's website for a list of supported types and further information.
+This package uses [typeable.js](https://github.com/xpepermint/typeablejs) for data type casting. Many common data types and array types are supported but we can also define custom types or override existing types through the `types` key. Please check package's website for a list of supported types and further information.
 
 By default, all fields in a schema are set to `null`. We can set a default value for a field by setting the `defaultValue` option.
 
-Field validation is handled by the [validatable.js](https://github.com/xpepermint/validatablejs) package. We can configure the validator by passing the `validatorOptions` option to our schema which will be passed directly to the `Validator` class. The package provides many built-in validators, allows adding custom validators and overriding existing ones. When a document is created all validator methods share document's context thus we can write context-aware checks. Please check package's website for details.
+Field validation is handled by the [validatable.js](https://github.com/xpepermint/validatablejs) package. We can configure the package by setting `validators` and `firstErrorOnly` options. The package provides many built-in validators, allows adding custom validators and overriding existing ones. When a document is created all validator methods share document's context thus we can write context-aware checks. Please check package's website for details.
 
-*Contextable.js* has a unique concept of handling field-related errors. It uses the [handleable.js](https://github.com/xpepermint/handleablejs) under the hood. We can configure the handler by passing the `handlerOptions` key to our schema which will be passed directly to the `Handler` class. The package already provides some built-in handlers, it allows adding custom handlers and overriding existing ones. When a document is created all handlers share document's context thus we can write context-aware checks. Please check package's website for further information.
+*Contextable.js* has a unique concept of handling field-related errors. It uses the [handleable.js](https://github.com/xpepermint/handleablejs) under the hood. We can configure the handler through the `handlers` and `firstErrorOnly` keys The package already provides some built-in handlers, it allows adding custom handlers and overriding existing ones. When a document is created all handlers share document's context thus we can write context-aware checks. Please check package's website for further information.
 
 Schema also holds information about model's class methods, instance methods, class virtual fields and instance virtual fields. You can define synchronous or asynchronous, class and instance methods. All model properties are context-aware and you can access the context through the `this.$context` getter.
 
 ### Context
 
-Context is an object, holding application-related configuration data, data adapters and other information. It provides methods for creating unopinionated, context-aware, schema enforced models.
+Context is an object, holding application-related configuration data, adapters and other information. It provides methods for creating unopinionated, context-aware, schema enforced models.
 
 **new Context(props)**
 
@@ -441,7 +446,7 @@ const context = new Context({
 | descriptor | Object | Yes | - | The [descriptor](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty#Description) for the property being defined or modified.
 
 ```js
-context.defineProperty('memorize', {
+let memorize = context.defineProperty('memorize', {
   value: 'This is awesome.',
   enumerable: true
 });
@@ -458,10 +463,13 @@ context.defineProperty('memorize', {
 | options | Object | No | {} | The [descriptor](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty#Description) options for the property being defined or modified (except options `value`, `get` and `set`).
 
 ```js
-context.defineProperty('memorize', {
-  value: 'This is awesome.',
-  enumerable: true
-});
+let User = context.defineModel('User', new Schema({
+  fields: {
+    name: {
+      type: 'String'
+    }
+  }
+}));
 ```
 
 ### Model
@@ -563,6 +571,14 @@ doc.applyErrors([
 
 > Returns a new Model instance which is the exact copy of the original.
 
+**Model.prototype.collect(handler)**: Array
+
+> Scrolls through model fields and collects results.
+
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| handler | Function | Yes | - | A handler method which is executed for each field.
+
 **Model.prototype.collectErrors()**: Array
 
 > Returns a list of errors for all the fields (e.g. [{path, errors}[]).
@@ -578,6 +594,18 @@ doc.applyErrors([
 **Model.prototype.fake()**: Model
 
 > Sets each model field to its fake value if a fake value generator is registered, otherwise the default value is used.
+
+**Model.prototype.filter(handler)**: Object
+
+> Converts a model into serialized data object with only the keys that pass the test.
+
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| handler | Function | Yes | - | A function to test each key value. If the function returns `true` then the key is included in the returned object.
+
+**Model.prototype.flatten()**: Array
+
+> Converts the model into an array of fields.
 
 **Model.prototype.getPath(...keys)**: Field
 
@@ -623,6 +651,10 @@ user.collectErrors(); // -> an array of all errors (including those deeply neste
 
 > Returns `true` if at least one model field has been changed.
 
+**Model.prototype.isNested()**: Boolean
+
+> Returns `true` if nested fields exist.
+
 **Model.prototype.isValid()**: Boolean
 
 > Returns `true` when all model fields are valid (inverse of `hasErrors()`). Make sure that you call the `validate()` method first.
@@ -647,7 +679,15 @@ user.collectErrors(); // -> an array of all errors (including those deeply neste
 
 > Sets each model field to its initial value (last committed value). This is how you can discharge model changes.
 
-**Model.prototype.toObject()**: Object
+**Model.prototype.scroll(handler)**: Integer
+
+> Scrolls through model fields and executes a handler on each field.
+
+| Option | Type | Required | Default | Description
+|--------|------|----------|---------|------------
+| handler | Function | Yes | - | A handler method which is executed for each field.
+
+**Model.prototype.serialize()**: Object
 
 > Converts a model into serialized data object.
 
@@ -738,6 +778,10 @@ user.$name.isChanged(); // calling field instance method
 **Field.prototype.isChanged()**: Boolean
 
 > Returns `true` if the field or at least one sub field have been changed.
+
+**Field.prototype.isNested()**: Boolean
+
+> Returns `true` if the field is a nested model.
 
 **Field.prototype.isValid()**: Boolean
 

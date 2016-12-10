@@ -1,3 +1,4 @@
+import {Document} from './documents';
 import {createModel} from './models';
 
 /*
@@ -34,15 +35,8 @@ export class Context {
   */
 
   defineModel (name, schema, options = {}) {
-    let model = createModel(schema, this);
-
-    let descriptor = Object.assign({
-      enumerable: true
-    }, options, {
-      get: () => model
-    });
-    delete descriptor.set;
-    delete descriptor.value;
+    let Model = createModel(Document, schema, this);
+    let descriptor = Object.assign({get: () => Model}, options);
 
     return this.defineProperty(name, descriptor);
   }

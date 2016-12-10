@@ -1,137 +1,51 @@
-import {
-  isPresent,
-  isArray,
-  isObject,
-  isUndefined
-} from 'typeable';
-
-import {Document} from 'objectschema';
-import {Handler} from 'handleable';
-import {Schema} from './schemas';
-import {Field} from './fields';
-
 /*
-* Creates a Model class with context.
+* Compiles a schema into a model class.
 */
 
-export function createModel (schema, context=null) {
+export function createModel (Document, schema, context = null) {
   let {classMethods, classVirtuals, instanceMethods, instanceVirtuals} = schema;
 
-  /*
-  * Model class template.
-  */
-
   class Model extends Document {
+    constructor (_data, _schema, _parent) {
+      super(_data, _schema || schema, _parent);
 
-    /*
-    * Class constructor.
-    */
-
-    constructor (...args) {
-      let [relatedSchema, data] = args; // a workaround because a Document constructor has more then 1 argument
-      if (!data) {
-        data = relatedSchema;
-        relatedSchema = schema;
-      }
-      super(relatedSchema, data);
-
-      Object.defineProperty(this, '$context', {
-        value: context
-      });
-      Object.defineProperty(this, '$handler', {
-        value: this._createHandler()
+      Object.defineProperty(this, '$context', { // context object
+        get: () => context || this.$root.$context
       });
 
       for (let name in instanceMethods) {
-        let method = instanceMethods[name];
-
         Object.defineProperty(this, name, {
-          value: method
+          value: instanceMethods[name]
         });
       }
 
       for (let name in instanceVirtuals) {
-        let {get, set} = instanceVirtuals[name];
-
         Object.defineProperty(this, name, {
-          get,
-          set,
+          get: instanceVirtuals[name].get,
+          set: instanceVirtuals[name].set,
           enumerable: true // expose as object key
         });
       }
     }
-
-    /*
-    * Returns a new instance of validator.
-    */
-
-    _createHandler () {
-      return new Handler(Object.assign({}, this.$schema.handlerOptions, {context: this}));
-    }
-
-    /*
-    * OVERRIDDEN: Creates a new Field instance.
-    */
-
-    _createField (name) {
-      return new Field(this, name);
-    }
-
-    /*
-    * If the error is not a validation error, then it tries to create one by
-    * checking document fields against handlers.
-    */
-
-    async handle (error, {quiet = true} = {}) {
-      if (error.code === 422) return this;
-
-      let {fields} = this.$schema;
-      for (let path in fields) {
-        await this[`$${path}`].handle(error);
-      }
-
-      let paths = this.collectErrors().map((e) => e.path);
-      if (!quiet && paths.length > 0) {
-        let error = this._createValidationError(paths);
-        throw error;
-      }
-      else if (paths.length === 0) {
-        throw error; // unhandled error is always thrown
-      }
-
-      return this;
-    }
-  };
-
-  /*
-  * Module static properties.
-  */
+  }
 
   Object.defineProperty(Model, '$context', {
     value: context
   });
 
   for (let name in classMethods) {
-    let method = classMethods[name];
-
     Object.defineProperty(Model, name, {
-      value: method.bind(Model)
+      value: classMethods[name].bind(Model)
     });
   }
 
   for (let name in classVirtuals) {
-    let {get, set} = classVirtuals[name];
-
     Object.defineProperty(Model, name, {
-      get: get ? get.bind(Model) : undefined,
-      set: set ? set.bind(Model) : undefined,
+      get: classVirtuals[name].get ? classVirtuals[name].get.bind(Model) : undefined,
+      set: classVirtuals[name].set ? classVirtuals[name].set.bind(Model) : undefined,
       enumerable: true // expose as object key
     });
   }
-
-  /*
-  * Returning Module class.
-  */
 
   return Model;
 }

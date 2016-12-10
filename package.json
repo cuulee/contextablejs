@@ -1,6 +1,6 @@
 {
   "name": "contextable",
-  "version": "2.10.0",
+  "version": "3.0.0",
   "description": "Simple, unopinionated and minimalist framework for creating context objects with support for unopinionated ORM, object schemas, type casting, validation and error handling.",
   "main": "./dist/index.js",
   "ava": {
@@ -80,7 +80,7 @@
   "dependencies": {
     "babel-runtime": "6.18.x",
     "handleable": "0.16.x",
-    "objectschema": "2.22.x",
+    "objectschema": "3.7.x",
     "typeable": "0.20.x"
   }
 }

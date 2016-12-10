@@ -1,18 +1,17 @@
 const test = require('ava');
-const {Schema, Context} = require('../dist');
+const {Document, Schema, Context} = require('../dist');
 const {createModel} = require('../dist/models');
 
 test('should allow static properties', (t) => {
   let context = {major: 1};
-
-  let userSchema = new Schema({
+  let schema = new Schema({
     classVirtuals: {
       version: {
         get() {return `v${this.$context.major}.0.0`}
       }
     }
   });
-  let User = createModel(userSchema, context);
+  let User = createModel(Document, schema, context);
 
   t.deepEqual(User.$context, context);
   t.is(User.version, 'v1.0.0');
@@ -21,21 +20,19 @@ test('should allow static properties', (t) => {
 
 test('should allow static methods', (t) => {
   let context = {id: '100'};
-
-  let userSchema = new Schema({
+  let schema = new Schema({
     classMethods: {
       ping() {return `Hey #${this.$context.id}`}
     },
   });
-  let User = createModel(userSchema, context);
+  let User = createModel(Document, schema, context);
 
   t.is(User.ping(), 'Hey #100');
 });
 
 test('should allow instance properties', (t) => {
   let context = {id: '100'};
-
-  let userSchema = new Schema({
+  let schema = new Schema({
     fields: {
       name: {
         type: 'String'
@@ -47,7 +44,7 @@ test('should allow instance properties', (t) => {
       }
     }
   });
-  let User = createModel(userSchema, context);
+  let User = createModel(Document, schema, context);
   let user = new User({name: 'John'});
 
   t.is(user.name, 'John');
@@ -57,20 +54,19 @@ test('should allow instance properties', (t) => {
 
 test('should allow instance methods', (t) => {
   let context = {now: 100};
-
-  let userSchema = new Schema({
+  let schema = new Schema({
     instanceMethods: {
       getTime() {return this.$context.now + 10}
     }
   });
-  let User = createModel(userSchema, context);
+  let User = createModel(Document, schema, context);
   let user = new User();
 
   t.is(user.getTime(), 110);
 });
 
 test('method `handle` should pass through a validation error', async (t) => {
-  let User = createModel(new Schema());
+  let User = createModel(Document, new Schema());
   let user = new User();
 
   let error = new Error();
@@ -80,7 +76,7 @@ test('method `handle` should pass through a validation error', async (t) => {
 });
 
 test('method `handle` should throw the provided error when the error is unhandled', async (t) => {
-  let User = createModel(new Schema());
+  let User = createModel(Document, new Schema());
   let user = new User();
 
   let error = new Error();
@@ -89,15 +85,13 @@ test('method `handle` should throw the provided error when the error is unhandle
 });
 
 test('method `handle` should handle fields', async (t) => {
-  let handlerOptions = {
-    handlers: {
-      alreadyTaken: (e) => e.message === 'already taken',
-      notFound: (e) => e.message === 'not found'
-    }
+  let handlers = {
+    alreadyTaken: (e) => e.message === 'already taken',
+    notFound: (e) => e.message === 'not found'
   };
 
   let bookSchema = new Schema({
-    handlerOptions,
+    handlers,
     fields: {
       title: {
         type: 'String',
@@ -112,7 +106,7 @@ test('method `handle` should handle fields', async (t) => {
     }
   });
   let userSchema = new Schema({
-    handlerOptions,
+    handlers,
     fields: {
       name: {
         type: 'String',
@@ -140,7 +134,7 @@ test('method `handle` should handle fields', async (t) => {
     book: {},
     books: [null, {}]
   };
-  let User = createModel(userSchema);
+  let User = createModel(Document, userSchema);
   let user = new User(data);
   let problem = new Error('not found');
   let result = {handler: 'notFound', message: 'not found', code: 422};
@@ -196,7 +190,7 @@ test('method `applyErrors` should set field `errors` property', async (t) => {
     newBook: {},
     newBooks: [{}, {}]
   };
-  let User = createModel(userSchema);
+  let User = createModel(Document, userSchema);
   let user = new User(data);
   let validatorError = {validator: 'foo', message: 'bar', code: 422};
   let result = {handler: 'foo', message: 'bar', code: 422};

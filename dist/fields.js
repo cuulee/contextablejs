@@ -33,11 +33,13 @@ var _inherits2 = require('babel-runtime/helpers/inherits');
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
+var _typeable = require('typeable');
+
 var _objectschema = require('objectschema');
 
 var objectschema = _interopRequireWildcard(_objectschema);
 
-var _typeable = require('typeable');
+var _documents = require('./documents');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 

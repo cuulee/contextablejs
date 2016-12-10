@@ -21,6 +21,8 @@ var _createClass2 = require('babel-runtime/helpers/createClass');
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
+var _documents = require('./documents');
+
 var _models = require('./models');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -76,17 +78,10 @@ var Context = exports.Context = function () {
     value: function defineModel(name, schema) {
       var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-      var model = (0, _models.createModel)(schema, this);
-
-      var descriptor = (0, _extends3.default)({
-        enumerable: true
-      }, options, {
-        get: function get() {
-          return model;
-        }
-      });
-      delete descriptor.set;
-      delete descriptor.value;
+      var Model = (0, _models.createModel)(_documents.Document, schema, this);
+      var descriptor = (0, _extends3.default)({ get: function get() {
+          return Model;
+        } }, options);
 
       return this.defineProperty(name, descriptor);
     }

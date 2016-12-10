@@ -11,7 +11,7 @@ test('can be extended through mixins', async (t) => {
         type: [animalSchema]
       }
     }),
-    handlerOptions: {foo: 'foo'},
+    handlers: {foo: 'foo'},
     classMethods: {foo: 'foo'},
     classVirtuals: {foo: 'foo'},
     instanceMethods: {foo: 'foo'},
@@ -27,7 +27,7 @@ test('can be extended through mixins', async (t) => {
       }
     }),
     strict: false,
-    handlerOptions: {bar: 'bar'},
+    handlers: {bar: 'bar'},
     classMethods: {bar: 'bar'},
     classVirtuals: {bar: 'bar'},
     instanceMethods: {bar: 'bar'},
@@ -42,7 +42,7 @@ test('can be extended through mixins', async (t) => {
         type: [dogSchema]
       }
     }),
-    handlerOptions: {baz: 'baz'},
+    handlers: {baz: 'baz'},
     classMethods: {baz: 'baz'},
     classVirtuals: {baz: 'baz'},
     instanceMethods: {baz: 'baz'},
@@ -50,8 +50,8 @@ test('can be extended through mixins', async (t) => {
   });
 
   let keys = [];
-  // handlerOptions
-  keys = Object.keys(catSchema.handlerOptions)
+  // handlers
+  keys = Object.keys(catSchema.handlers)
   t.deepEqual(keys, ['foo', 'bar', 'baz']);
   // classMethods
   keys = Object.keys(catSchema.classMethods)

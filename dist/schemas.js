@@ -54,12 +54,14 @@ var Schema = exports.Schema = function (_objectschema$Schema) {
         fields = _ref$fields === undefined ? {} : _ref$fields,
         _ref$strict = _ref.strict,
         strict = _ref$strict === undefined ? true : _ref$strict,
-        _ref$validatorOptions = _ref.validatorOptions,
-        validatorOptions = _ref$validatorOptions === undefined ? {} : _ref$validatorOptions,
-        _ref$typeOptions = _ref.typeOptions,
-        typeOptions = _ref$typeOptions === undefined ? {} : _ref$typeOptions,
-        _ref$handlerOptions = _ref.handlerOptions,
-        handlerOptions = _ref$handlerOptions === undefined ? {} : _ref$handlerOptions,
+        _ref$validators = _ref.validators,
+        validators = _ref$validators === undefined ? {} : _ref$validators,
+        _ref$types = _ref.types,
+        types = _ref$types === undefined ? {} : _ref$types,
+        _ref$firstErrorOnly = _ref.firstErrorOnly,
+        firstErrorOnly = _ref$firstErrorOnly === undefined ? false : _ref$firstErrorOnly,
+        _ref$handlers = _ref.handlers,
+        handlers = _ref$handlers === undefined ? {} : _ref$handlers,
         _ref$classMethods = _ref.classMethods,
         classMethods = _ref$classMethods === undefined ? {} : _ref$classMethods,
         _ref$classVirtuals = _ref.classVirtuals,
@@ -71,13 +73,13 @@ var Schema = exports.Schema = function (_objectschema$Schema) {
 
     (0, _classCallCheck3.default)(this, Schema);
 
-    var _this = (0, _possibleConstructorReturn3.default)(this, (Schema.__proto__ || (0, _getPrototypeOf2.default)(Schema)).call(this, { mixins: mixins, fields: fields, strict: strict, validatorOptions: validatorOptions, typeOptions: typeOptions }));
+    var _this = (0, _possibleConstructorReturn3.default)(this, (Schema.__proto__ || (0, _getPrototypeOf2.default)(Schema)).call(this, { mixins: mixins, fields: fields, strict: strict, validators: validators, types: types, firstErrorOnly: firstErrorOnly }));
 
-    Object.defineProperty(_this, 'handlerOptions', { // handleable.js configuration options
+    Object.defineProperty(_this, 'handlers', { // handleable.js configuration options
       get: function get() {
         return _utils.merge.apply(undefined, (0, _toConsumableArray3.default)(mixins.map(function (v) {
-          return v.handlerOptions;
-        })).concat([handlerOptions]));
+          return v.handlers;
+        })).concat([handlers]));
       },
       enumerable: true // required for deep nesting
     });

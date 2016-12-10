@@ -2049,9 +2049,9 @@ object.omit@^2.0.0:
     for-own "^0.1.4"
     is-extendable "^0.1.1"
 
-objectschema@2.22.x:
-  version "2.22.0"
-  resolved "https://registry.yarnpkg.com/objectschema/-/objectschema-2.22.0.tgz#277f076d9d3917e70ac05feef0d5f859e440a125"
+objectschema@3.7.x:
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/objectschema/-/objectschema-3.7.0.tgz#898c0d2f0b7046610edaafd1bfe7cec15ac9d5ee"
   dependencies:
     babel-runtime "6.18.x"
     lodash.isequal "4.4.x"

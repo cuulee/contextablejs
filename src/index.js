@@ -1,4 +1,5 @@
 import {Schema} from './schemas';
+import {Document} from './documents';
 import {Context} from './contexts';
 
 /*
@@ -7,5 +8,6 @@ import {Context} from './contexts';
 
 export {
   Schema,
+  Document,
   Context
 };

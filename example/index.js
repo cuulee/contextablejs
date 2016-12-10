@@ -1,41 +1,29 @@
-import {ApplicationContext} from './context';
+const {Context} = require('./context');
 
 (async function () {
-
   // initializing and starting application context
-  let context = new ApplicationContext();
+  let context = new Context();
   await context.start();
 
-  // initializing data object
-  let userData = {
+  // initializing model
+  let {User} = context;
+  let user = new User({
     name: 'John Smith',
     email: 'john@smith.com'
-  };
+  });
 
-  // creating a new user
-  let {User} = context;
-  let user = null;
+  // create new record
   try {
-    user = await User.create(userData);
+    await user.validate();
+    await user.insert();
   }
-  catch (error) {
-    return console.error(error);
-  }
-
-  // updating user's email field
-  user.email = 'john.smith@google.com';
-  try {
-    await user.save();
-  }
-  catch (error) {
-    return console.error(error);
+  catch (e) {
+    await user.handle(e);
   }
 
-  // displaying user
-  if (!user.isValid()) {
-    console.log('Mongo Error:', user.collectErrors()[0].errors[0]);
-  }
-
-  console.log('User Object:', JSON.stringify(user, null, 2));
+  // displaying stats
+  console.log('object:', JSON.stringify(user, null, 2));
+  console.log('valid:', user.isValid());
+  console.log('errors:', JSON.stringify(user.collectErrors(), null, 2));
 
 })().catch(console.error);
